@@ -15,8 +15,8 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.1.6.0")]
-[assembly: AssemblyFileVersion("1.1.6.0")]
+[assembly: AssemblyVersion("1.1.7.0")]
+[assembly: AssemblyFileVersion("1.1.7.0")]
 
 internal static class Program
 {
@@ -67,9 +67,8 @@ internal sealed class LauncherWindow
     private readonly TextBlock progressText;
     private readonly Button themeButton;
     private readonly System.Windows.Shapes.Path themeGlyph;
-    private readonly FrameworkElement settingsPanel;
     private readonly TextBlock settingsFeedback;
-    private readonly Button autoPathButton;
+    private readonly MenuItem autoPathItem;
     private readonly Button manualPathButton;
     private readonly TextBlock installPath;
     private readonly string appDirectory;
@@ -100,26 +99,24 @@ internal sealed class LauncherWindow
         bar = (ProgressBar)view.FindName("Progress");
         progressRow = (FrameworkElement)view.FindName("ProgressRow");
         progressText = (TextBlock)view.FindName("ProgressText");
-        var settingsButton = (Button)view.FindName("SettingsButton");
+        var languageButton = (Button)view.FindName("LanguageButton");
         themeButton = (Button)view.FindName("ThemeButton");
         themeGlyph = (System.Windows.Shapes.Path)view.FindName("ThemeGlyph");
-        settingsPanel = (FrameworkElement)view.FindName("SettingsPanel");
         settingsFeedback = (TextBlock)view.FindName("SettingsFeedback");
-        autoPathButton = (Button)view.FindName("AutoPathButton");
+        autoPathItem = (MenuItem)view.FindName("AutoPathItem");
         manualPathButton = (Button)view.FindName("ManualPathButton");
         installPath = (TextBlock)view.FindName("InstallPath");
         start.Click += OnStart;
         restore.Click += OnRestore;
-        settingsButton.Click += (sender, args) => {
-            settingsPanel.BringIntoView();
-            AnimateEntrance(settingsPanel);
+        languageButton.Click += (sender, args) => {
+            SetUiLanguage(preferences.UiLanguage == "zh-CN" ? "en-US" : "zh-CN");
+            AnimateEntrance(languageButton);
         };
         themeButton.Click += (sender, args) => SetTheme(darkTheme ? ThemeMode.Light : ThemeMode.Dark);
         var systemThemeItem = (MenuItem)view.FindName("SystemThemeItem");
         systemThemeItem.Click += (sender, args) => SetTheme(ThemeMode.System);
-        autoPathButton.Click += (sender, args) => SelectGamePath(null);
+        autoPathItem.Click += (sender, args) => SelectGamePath(null);
         manualPathButton.Click += ChooseGamePath;
-        ConfigureSettings();
         ApplyUiLanguage();
         ApplyTheme();
         window.SourceInitialized += (sender, args) => {
@@ -137,16 +134,6 @@ internal sealed class LauncherWindow
             SystemEvents.UserPreferenceChanged -= OnSystemPreferenceChanged;
             SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         };
-    }
-
-    private void ConfigureSettings()
-    {
-        var chinese = (RadioButton)window.FindName("UiChinese");
-        var english = (RadioButton)window.FindName("UiEnglish");
-        chinese.IsChecked = preferences.UiLanguage == "zh-CN";
-        english.IsChecked = preferences.UiLanguage == "en-US";
-        chinese.Checked += (sender, args) => { SetUiLanguage("zh-CN"); AnimateEntrance(chinese); };
-        english.Checked += (sender, args) => { SetUiLanguage("en-US"); AnimateEntrance(english); };
     }
 
     private void SetUiLanguage(string language)
@@ -195,19 +182,21 @@ internal sealed class LauncherWindow
         string path = manual ? preferences.GamePath : detectedGamePath;
         string display = text.Get(manual ? "PathModeManual" : "PathModeAuto", path ?? text.Get("PathUnknown"));
         installPath.Text = installProblem == null ? display : display + Environment.NewLine + installProblem.Render(text);
-        manualPathButton.SetResourceReference(ContentControl.ContentProperty, manual ? "ChangePath" : "ChoosePath");
+        string action = manual ? "ChangePath" : "ChoosePath";
+        manualPathButton.SetResourceReference(FrameworkElement.ToolTipProperty, action);
+        manualPathButton.SetResourceReference(AutomationProperties.NameProperty, action);
+        autoPathItem.IsEnabled = manual;
     }
 
     private void SavePreferences()
     {
-        settingsFeedback.Visibility = Visibility.Visible;
         try
         {
             preferences.Save(preferencesPath);
-            settingsFeedback.SetResourceReference(TextBlock.TextProperty, "PrefsSaved");
+            settingsFeedback.Visibility = Visibility.Collapsed;
         }
-        catch (IOException) { settingsFeedback.SetResourceReference(TextBlock.TextProperty, "PrefsFailure"); }
-        catch (UnauthorizedAccessException) { settingsFeedback.SetResourceReference(TextBlock.TextProperty, "PrefsFailure"); }
+        catch (IOException) { settingsFeedback.Visibility = Visibility.Visible; }
+        catch (UnauthorizedAccessException) { settingsFeedback.Visibility = Visibility.Visible; }
     }
 
     private void SetTheme(ThemeMode theme)
@@ -309,7 +298,6 @@ internal sealed class LauncherWindow
         restore.IsEnabled = original != null;
         restore.ToolTip = restore.IsEnabled
             ? text.Get("RestoreTooltip", UiMessage.Locale(original)) : text.Get("RestoreUnavailable");
-        autoPathButton.IsEnabled = operation == null;
         manualPathButton.IsEnabled = operation == null;
     }
 

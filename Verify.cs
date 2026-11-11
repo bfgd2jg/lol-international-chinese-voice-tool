@@ -97,17 +97,18 @@ internal static class Verify
         IntPtr dpiAwareness = GetWindowDpiAwarenessContext(handle);
         Require(AreDpiAwarenessContextsEqual(dpiAwareness, new IntPtr(-4))
             || AreDpiAwarenessContextsEqual(dpiAwareness, new IntPtr(-3)));
-        var settings = (Button)window.FindName("SettingsButton");
-        var settingsPanel = (FrameworkElement)window.FindName("SettingsPanel");
+        var language = (Button)window.FindName("LanguageButton");
+        var manualPath = (Button)window.FindName("ManualPathButton");
+        var autoPathItem = (MenuItem)window.FindName("AutoPathItem");
         var start = (Button)window.FindName("StartButton");
         var theme = (Button)window.FindName("ThemeButton");
         var scroll = (ScrollViewer)window.FindName("PageScroll");
-        Require(settingsPanel.Visibility == Visibility.Visible && start.Visibility == Visibility.Visible);
+        Require(!autoPathItem.IsEnabled && AutomationProperties.GetName(manualPath) == "手动选择");
         Require(AutomationProperties.GetName(theme) == "切换为深色模式");
         Draw(window, 404, 431, Path.Combine(root, "settings-light.png"));
         theme.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        ((RadioButton)window.FindName("UiEnglish")).IsChecked = true;
-        Require(AutomationProperties.GetName(settings) == "Settings"
+        language.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Require(AutomationProperties.GetName(language) == "Switch interface to Simplified Chinese"
             && AutomationProperties.GetName(theme) == "Switch to light theme");
         Require(((TextBlock)window.FindName("InstallPath")).Text.StartsWith("Auto-detect"));
         Require(((TextBlock)window.FindName("StateTitle")).Text == "Current setting: Chinese (Taiwan)");
@@ -116,22 +117,20 @@ internal static class Verify
         ((TextBlock)window.FindName("InstallPath")).Text = @"Auto-detect · D:\Riot Games\League of Legends";
         Draw(window, 404, 431, Path.Combine(root, "settings-dark.png"));
         Draw(window, 340, 285, Path.Combine(root, "settings-compact.png"), 144);
-        var view = (FrameworkElement)window.Content;
-        Point gearPosition = settings.TranslatePoint(new Point(), view);
-        settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        view.UpdateLayout();
-        Require(scroll.VerticalOffset > 0 && settings.TranslatePoint(new Point(), view) == gearPosition
-            && settingsPanel.Visibility == Visibility.Visible && start.Visibility == Visibility.Visible);
-        scroll.ScrollToTop();
         Draw(window, 404, 431, Path.Combine(root, "home-dark.png"), 144);
         Require(scroll.ScrollableHeight == 0);
-        ((RadioButton)window.FindName("UiChinese")).IsChecked = true;
-        Require(AutomationProperties.GetName(settings) == "设置");
+        language.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Require(AutomationProperties.GetName(language) == "切换为英文界面"
+            && LauncherPreferences.Load(preferenceFile).UiLanguage == "zh-CN");
         ((TextBlock)window.FindName("InstallPath")).Text = @"自动识别 · D:\Riot Games\League of Legends";
         Draw(window, 404, 431, Path.Combine(root, "settings-dark-125.png"), 120);
-        var manualPath = (Button)window.FindName("ManualPathButton");
         var pathButtons = (Grid)manualPath.Parent;
-        var focusCue = new Control { Style = manualPath.FocusVisualStyle, IsHitTestVisible = false };
+        double iconCenter = manualPath.TranslatePoint(new Point(0, manualPath.ActualHeight / 2), pathButtons).Y;
+        Require(Math.Abs(iconCenter - pathButtons.ActualHeight / 2) <= 1);
+        var focusCue = new Control {
+            Style = manualPath.FocusVisualStyle, IsHitTestVisible = false, Margin = manualPath.Margin,
+            Height = manualPath.MinHeight, VerticalAlignment = manualPath.VerticalAlignment
+        };
         Grid.SetColumn(focusCue, Grid.GetColumn(manualPath));
         pathButtons.Children.Add(focusCue);
         Draw(window, 404, 431, Path.Combine(root, "settings-compact-150.png"), 144);
@@ -145,17 +144,21 @@ internal static class Verify
         percent.Text = "63%";
         start.Content = "停止等待";
         Draw(window, 404, 431, Path.Combine(root, "progress-compact.png"), 192);
-        Draw(window, 344, 300, Path.Combine(root, "progress-small-screen.png"), 192);
+        Draw(window, 344, 215, Path.Combine(root, "progress-small-screen.png"), 192);
+        var view = (FrameworkElement)window.Content;
+        Point startPosition = start.TranslatePoint(new Point(), view);
         scroll.ScrollToEnd();
-        Draw(window, 344, 300, Path.Combine(root, "progress-small-screen-scrolled.png"), 192);
-        Require(scroll.VerticalOffset > 0);
+        Draw(window, 344, 215, Path.Combine(root, "progress-small-screen-scrolled.png"), 192);
+        Require(scroll.VerticalOffset > 0 && start.TranslatePoint(new Point(), view) == startPosition);
         saved.GamePath = game;
         saved.Save(preferenceFile);
         Window reopened = Program.LoadWindow();
         new LauncherWindow(reopened, appData).Initialize(install);
         Require(AutomationProperties.GetName((Button)reopened.FindName("ThemeButton")) == "Switch to light theme");
-        Require(((RadioButton)reopened.FindName("UiEnglish")).IsChecked == true);
+        Require(AutomationProperties.GetName((Button)reopened.FindName("LanguageButton")) == "Switch interface to Simplified Chinese");
         Require(((TextBlock)reopened.FindName("InstallPath")).Text == "Manual · " + game);
+        Require(((MenuItem)reopened.FindName("AutoPathItem")).IsEnabled
+            && AutomationProperties.GetName((Button)reopened.FindName("ManualPathButton")) == "Change path");
         var systemThemeItem = (MenuItem)window.FindName("SystemThemeItem");
         systemThemeItem.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
         Require(LauncherPreferences.Load(preferenceFile).Theme == ThemeMode.System);

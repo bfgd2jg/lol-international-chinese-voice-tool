@@ -1,6 +1,5 @@
 AppTitle	LOL国际服改中文语音工具	LoL International Chinese Voice Tool
-Brand	LOL国际服改中文语音工具	LoL Chinese Voice Tool
-Settings	设置	Settings
+LanguageSwitch	切换为英文界面	Switch interface to Simplified Chinese
 Checking	正在检查安装	Checking installation
 UpdateProgress	语言资源更新进度	Language download progress
 Start	切换为简中	Switch to Chinese
@@ -10,9 +9,8 @@ ThemeLight	切换为浅色模式	Switch to light theme
 ThemeDark	切换为深色模式	Switch to dark theme
 ThemeLightHint	切换为浅色模式。右键可选跟随系统。	Switch to light theme. Right-click to follow Windows.
 ThemeDarkHint	切换为深色模式。右键可选跟随系统。	Switch to dark theme. Right-click to follow Windows.
-UiLanguage	启动器语言	Launcher language
 InstallLocation	游戏安装位置	Game installation
-AutoDetect	使用自动识别	Use auto-detect
+AutoDetect	恢复自动识别	Restore automatic detection
 ChoosePath	手动选择	Choose manually
 ChangePath	更改路径	Change path
 PathModeAuto	自动识别 · {0}	Auto-detect · {0}
@@ -21,7 +19,6 @@ PathUnknown	未识别到安装位置	Install location not detected
 ChooseGame	选择英雄联盟安装目录里的 LeagueClient.exe	Select LeagueClient.exe in your League installation
 ChooseFilter	英雄联盟客户端 (LeagueClient.exe)|LeagueClient.exe	League Client (LeagueClient.exe)|LeagueClient.exe
 ManualPathInvalid	请选择安装目录中的 LeagueClient.exe。	Select LeagueClient.exe in the installation directory.
-PrefsSaved	设置已保存。	Settings saved.
 PrefsFailure	无法保存。当前设置在这次打开期间有效。	Couldn't save settings. Changes apply for this session.
 AlreadyRunning	启动器已经打开。	The launcher is already open.
 ConfigCurrent	当前设置为 {0}	Current setting: {0}
@@ -41,8 +38,8 @@ Stopped	已停止等待	Stopped waiting
 StoppedHint	可以在 Riot 查看更新状态，或使用这里的「恢复原语言」。	Check update progress in Riot, or use Restore language.
 Incomplete	切换未完成	Language switch incomplete
 ErrorMetadataMissing	找不到 Riot 的游戏设置。先通过 Riot 安装并打开一次英雄联盟。	Riot’s game settings are missing. Install and open League once through Riot.
-ErrorInstallPath	Riot 尚未登记有效的游戏路径，可在设置中手动选择。	Riot has no valid install path. You can choose one manually in Settings.
-ErrorGameMissing	找不到国际服客户端。请在设置中选择游戏目录，或先完成 Riot 安装。	League Client is missing. Select its location in Settings or finish installing in Riot.
+ErrorInstallPath	Riot 尚未登记有效的游戏路径，可点文件夹图标手动选择。	Riot has no valid install path. Use the folder icon to select it.
+ErrorGameMissing	找不到国际服客户端。可点文件夹图标选择游戏目录，或先完成 Riot 安装。	League Client is missing. Use the folder icon to select it or finish installing in Riot.
 ErrorPathConflict	手动路径与 Riot 当前登记的可用安装不同。请在 Riot 确认安装位置，再选择对应目录。	The selected folder differs from the working install registered in Riot. Check the install location in Riot and select that folder.
 ErrorRiotMissing	找不到 Riot 启动器。用原快捷方式启动一次 Riot 后再试。	Riot Client is missing. Start it once from its normal shortcut and retry.
 ErrorSettingsSection	找不到唯一的 Riot 游戏设置段。	Could not find exactly one Riot game settings section.

@@ -5,7 +5,8 @@
         Background="{DynamicResource Canvas}" FontFamily="Segoe UI, Microsoft YaHei UI" FontSize="14"
         UseLayoutRounding="True" SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Display">
   <Window.Resources>
-    <Geometry x:Key="GearIcon">M 10,2.5 L 14,2.5 14.7,5.2 16.4,6.2 19.1,5.5 21.1,9 19.2,11 19.2,13 21.1,15 19.1,18.5 16.4,17.8 14.7,18.8 14,21.5 10,21.5 9.3,18.8 7.6,17.8 4.9,18.5 2.9,15 4.8,13 4.8,11 2.9,9 4.9,5.5 7.6,6.2 9.3,5.2 Z M 15,12 A 3,3 0 1 0 9,12 A 3,3 0 1 0 15,12 Z</Geometry>
+    <Geometry x:Key="LanguageIcon">M 22,12 A 10,10 0 1 0 2,12 A 10,10 0 1 0 22,12 Z M 2,12 H 22 M 12,2 C 6.5,7 6.5,17 12,22 C 17.5,17 17.5,7 12,2 Z</Geometry>
+    <Geometry x:Key="FolderIcon">M 3,20 H 19 Q 21,20 21,18 V 8 Q 21,6 19,6 H 11 L 9,4 H 5 Q 3,4 3,6 Z M 3,9 H 21</Geometry>
     <Geometry x:Key="MoonIcon">M 20.6,15.4 A 9,9 0 0 1 8.6,3.4 A 9,9 0 1 0 20.6,15.4 Z</Geometry>
     <Geometry x:Key="SunIcon">M 16,12 A 4,4 0 1 0 8,12 A 4,4 0 1 0 16,12 Z M 12,2 L 12,4 M 12,20 L 12,22 M 2,12 L 4,12 M 20,12 L 22,12 M 5,5 L 6.5,6.5 M 17.5,17.5 L 19,19 M 19,5 L 17.5,6.5 M 6.5,17.5 L 5,19</Geometry>
     <Style TargetType="TextBlock">
@@ -87,44 +88,6 @@
       <Setter Property="StrokeEndLineCap" Value="Round"/>
       <Setter Property="IsHitTestVisible" Value="False"/>
     </Style>
-    <Style x:Key="Choice" TargetType="RadioButton">
-      <Setter Property="MinHeight" Value="44"/>
-      <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="Foreground" Value="{DynamicResource Ink}"/>
-      <Setter Property="Background" Value="{DynamicResource Panel}"/>
-      <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
-      <Setter Property="ContentTemplate" Value="{StaticResource ButtonLabel}"/>
-      <Setter Property="FocusVisualStyle" Value="{StaticResource FocusCue}"/>
-      <Setter Property="Template">
-        <Setter.Value>
-          <ControlTemplate TargetType="RadioButton">
-            <Grid Background="Transparent">
-              <Border x:Name="ChoiceSurface" Background="{TemplateBinding Background}"
-                      BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="7" Margin="1" Padding="6,3">
-                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-              </Border>
-              <Border x:Name="ChoiceHighlight" Margin="1" BorderBrush="{DynamicResource Focus}" BorderThickness="2"
-                      CornerRadius="7" IsHitTestVisible="False" Visibility="Collapsed"/>
-            </Grid>
-            <ControlTemplate.Triggers>
-              <Trigger Property="IsMouseOver" Value="True">
-                <Setter TargetName="ChoiceHighlight" Property="Visibility" Value="Visible"/>
-              </Trigger>
-              <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Background" Value="{DynamicResource Selected}"/>
-                <Setter Property="Foreground" Value="{DynamicResource SelectedInk}"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource Focus}"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
-                <Setter TargetName="ChoiceHighlight" Property="Visibility" Value="Visible"/>
-              </Trigger>
-              <Trigger Property="IsPressed" Value="True">
-                <Setter TargetName="ChoiceSurface" Property="Opacity" Value="0.85"/>
-              </Trigger>
-            </ControlTemplate.Triggers>
-          </ControlTemplate>
-        </Setter.Value>
-      </Setter>
-    </Style>
     <Style x:Key="Card" TargetType="Border">
       <Setter Property="Padding" Value="18,14"/>
       <Setter Property="CornerRadius" Value="9"/>
@@ -158,12 +121,9 @@
     </Style>
   </Window.Resources>
   <Grid Background="{DynamicResource Canvas}">
-    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition/></Grid.RowDefinitions>
+    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <Grid Margin="24,14,24,10" MaxWidth="650">
-      <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-      <TextBlock Text="{DynamicResource Brand}" FontSize="15" FontWeight="SemiBold"
-                 VerticalAlignment="Center" Margin="0,0,12,0"/>
-      <StackPanel Grid.Column="1" Orientation="Horizontal">
+      <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
         <Button x:Name="ThemeButton" Style="{StaticResource ToolbarButton}" Margin="0,0,8,0">
           <Button.ContextMenu>
             <ContextMenu Background="{DynamicResource Panel}" Foreground="{DynamicResource Ink}"
@@ -173,9 +133,9 @@
           </Button.ContextMenu>
           <Path x:Name="ThemeGlyph" Style="{StaticResource ToolbarGlyph}"/>
         </Button>
-        <Button x:Name="SettingsButton" Style="{StaticResource ToolbarButton}"
-                ToolTip="{DynamicResource Settings}" AutomationProperties.Name="{DynamicResource Settings}">
-          <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource GearIcon}"/>
+        <Button x:Name="LanguageButton" Style="{StaticResource ToolbarButton}"
+                ToolTip="{DynamicResource LanguageSwitch}" AutomationProperties.Name="{DynamicResource LanguageSwitch}">
+          <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource LanguageIcon}"/>
         </Button>
       </StackPanel>
     </Grid>
@@ -227,35 +187,36 @@
             </Grid>
           </StackPanel>
         </Border>
-        <Grid Margin="0,8,0,0">
-          <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-          <Button x:Name="StartButton" IsDefault="True" Style="{StaticResource ActionButton}" Content="{DynamicResource Start}"/>
-          <Button x:Name="RestoreButton" Grid.Column="1" Margin="10,0,0,0" Style="{StaticResource SecondaryButton}"
-                  Content="{DynamicResource Restore}"/>
-        </Grid>
-        <Border x:Name="SettingsPanel" Style="{StaticResource Card}" Padding="14,8" Margin="0,8,0,0"
-                AutomationProperties.Name="{DynamicResource Settings}">
+        <Border Style="{StaticResource Card}" Padding="14,8" Margin="0,8,0,0">
           <StackPanel>
             <Grid>
-              <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
-              <TextBlock Text="{DynamicResource UiLanguage}" FontWeight="SemiBold"/>
-              <TextBlock x:Name="SettingsFeedback" Grid.Column="1" Visibility="Collapsed" TextAlignment="Right"
-                         Foreground="{DynamicResource Muted}" FontSize="13" Margin="8,0,0,0"/>
+              <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="{DynamicResource InstallLocation}" FontWeight="SemiBold"/>
+                <TextBlock x:Name="InstallPath" Margin="0,4,0,0" Foreground="{DynamicResource Muted}"/>
+              </StackPanel>
+              <Button x:Name="ManualPathButton" Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center"
+                      Style="{StaticResource ToolbarButton}" Width="38" MinHeight="38" Padding="6">
+                <Button.ContextMenu>
+                  <ContextMenu Background="{DynamicResource Panel}" Foreground="{DynamicResource Ink}"
+                               BorderBrush="{DynamicResource Border}">
+                    <MenuItem x:Name="AutoPathItem" Header="{DynamicResource AutoDetect}"/>
+                  </ContextMenu>
+                </Button.ContextMenu>
+                <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource FolderIcon}"/>
+              </Button>
             </Grid>
-            <UniformGrid Columns="2" Margin="0,6,0,0">
-              <RadioButton x:Name="UiChinese" GroupName="UiLanguage" Content="简体中文" Style="{StaticResource Choice}"/>
-              <RadioButton x:Name="UiEnglish" GroupName="UiLanguage" Content="English" Style="{StaticResource Choice}" Margin="8,0,0,0"/>
-            </UniformGrid>
-            <TextBlock Text="{DynamicResource InstallLocation}" FontWeight="SemiBold" Margin="0,10,0,0"/>
-            <TextBlock x:Name="InstallPath" Margin="0,4,0,0" Foreground="{DynamicResource Muted}"/>
-            <Grid Margin="0,6,0,0">
-              <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
-              <Button x:Name="AutoPathButton" Content="{DynamicResource AutoDetect}" Style="{StaticResource SecondaryButton}"/>
-              <Button x:Name="ManualPathButton" Grid.Column="2" Content="{DynamicResource ChoosePath}" Style="{StaticResource SecondaryButton}"/>
-            </Grid>
+            <TextBlock x:Name="SettingsFeedback" Visibility="Collapsed" Text="{DynamicResource PrefsFailure}"
+                       Foreground="{DynamicResource Muted}" FontSize="13" Margin="0,6,0,0"/>
           </StackPanel>
         </Border>
     </StackPanel>
   </ScrollViewer>
+    <Grid Grid.Row="2" Margin="24,8,24,14" MaxWidth="650">
+      <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+      <Button x:Name="StartButton" IsDefault="True" Style="{StaticResource ActionButton}" Content="{DynamicResource Start}"/>
+      <Button x:Name="RestoreButton" Grid.Column="1" Margin="10,0,0,0" Style="{StaticResource SecondaryButton}"
+              Content="{DynamicResource Restore}"/>
+    </Grid>
   </Grid>
 </Window>
