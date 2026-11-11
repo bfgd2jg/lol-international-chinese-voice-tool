@@ -1,0 +1,100 @@
+AppTitle	LOL 大陆简中启动器	LoL Simplified Chinese Launcher
+Brand	LOL 语言工具	LoL Language Tool
+Settings	设置	Settings
+Back	返回	Back
+HeroTitle	大陆简中启动器	Simplified Chinese Launcher
+HeroDetail	切换国际服的文字和英雄语音	Switch the international client’s text and champion voices
+Checking	正在检查安装	Checking installation
+UpdateProgress	语言资源更新进度	Language download progress
+Start	切换简中并启动	Launch in Chinese
+Restore	恢复原语言	Restore language
+Footnote	第一次切换由 Riot 下载语言包。按提示点「更新」或「游玩」。	Riot downloads language files on first use. Click Update or Play when prompted.
+Theme	界面主题	Theme
+ThemeSystem	跟随系统	System
+ThemeLight	浅色	Light
+ThemeDark	深色	Dark
+UiLanguage	启动器语言	Launcher language
+LaunchMode	启动方式	Launch behavior
+AutoLaunch	自动打开英雄联盟	Open League automatically
+ManualLaunch	在 Riot 手动点游玩	Click Play in Riot
+WaitTime	等待语言资源的时间	Language download wait
+Wait20	20 分钟	20 min
+Wait45	45 分钟	45 min
+Wait90	90 分钟	90 min
+InstallLocation	游戏安装位置	Game installation
+AutoDetect	使用自动识别	Use auto-detect
+ChoosePath	手动选择	Choose manually
+ChangePath	更改路径	Change path
+PathModeAuto	自动识别 · {0}	Auto-detect · {0}
+PathModeManual	手动 · {0}	Manual · {0}
+PathUnknown	未识别到安装位置	Install location not detected
+ChooseGame	选择英雄联盟安装目录里的 LeagueClient.exe	Select LeagueClient.exe in your League installation
+ChooseFilter	英雄联盟客户端 (LeagueClient.exe)|LeagueClient.exe	League Client (LeagueClient.exe)|LeagueClient.exe
+ManualPathInvalid	请选择安装目录中的 LeagueClient.exe。	Select LeagueClient.exe in the installation directory.
+PrefsHint	设置自动保存。启动选项在下次切换时生效。	Settings save automatically. Launch options apply next time.
+PrefsSaved	设置已保存。启动选项在下次切换时生效。	Settings saved. Launch options apply next time.
+PrefsFailure	无法保存。当前设置在这次打开期间有效。	Couldn't save settings. Changes apply for this session.
+AlreadyRunning	启动器已经打开。	The launcher is already open.
+ConfigCurrent	当前设置为 {0}	Current setting: {0}
+ConfigChinese	可从这里启动。工具会核对客户端的实际语言。	Launch here to verify the language League actually uses.
+ConfigOther	点下方按钮切换到大陆简中。资源由 Riot 客户端下载。	Use the button below to switch to Simplified Chinese. Riot downloads the language files.
+InstallUnrecognized	暂时无法识别安装	Installation not recognized
+Stop	停止等待	Stop waiting
+RetryInstall	重新检查安装	Check installation again
+RestoreTooltip	恢复初次切换前的 {0}	Restore your original language ({0})
+RestoreUnavailable	首次切换时会记录原语言。	Your original language is saved on first switch.
+PermissionError	无法访问 Riot 配置。检查文件权限，退出 Riot 后重试。	Couldn't access Riot's settings. Check file permissions, quit Riot and retry.
+UnknownError	出现错误：{0}	Something went wrong: {0}
+Restoring	正在恢复原语言	Restoring language
+Preparing	正在准备简中设置	Preparing Simplified Chinese
+CheckingProcesses	正在检查英雄联盟和 Riot 的运行状态。	Checking whether League or Riot is running.
+Stopped	已停止等待	Stopped waiting
+StoppedHint	可以在 Riot 查看更新状态，或使用这里的「恢复原语言」。	Check update progress in Riot, or use Restore language.
+Incomplete	切换未完成	Language switch incomplete
+ErrorMetadataMissing	找不到 Riot 的游戏设置。先通过 Riot 安装并打开一次英雄联盟。	Riot’s game settings are missing. Install and open League once through Riot.
+ErrorInstallPath	Riot 尚未登记有效的游戏路径，可在设置中手动选择。	Riot has no valid install path. You can choose one manually in Settings.
+ErrorGameMissing	找不到国际服客户端。请在设置中选择游戏目录，或先完成 Riot 安装。	League Client is missing. Select its location in Settings or finish installing in Riot.
+ErrorPathConflict	手动路径与 Riot 当前登记的可用安装不同。请在 Riot 确认安装位置，再选择对应目录。	The selected folder differs from the working install registered in Riot. Check the install location in Riot and select that folder.
+ErrorRiotMissing	找不到 Riot 启动器。用原快捷方式启动一次 Riot 后再试。	Riot Client is missing. Start it once from its normal shortcut and retry.
+ErrorSettingsSection	找不到唯一的 Riot 游戏设置段。	Could not find exactly one Riot game settings section.
+ErrorSettingsEmpty	Riot 的游戏设置段为空。	Riot’s game settings section is empty.
+ErrorLocaleFormat	Riot 的游戏语言字段格式有变化。	Riot’s game language setting has an unexpected format.
+ErrorLocaleCode	无效的语言代码。	Invalid language code.
+ErrorConfigRead	Riot 配置读取不完整。	Riot’s configuration could not be read in full.
+ErrorConfigBusy	Riot 正在占用语言设置。等更新完成后再试。	Riot is using the language settings. Wait for its update to finish and retry.
+Region	服务器 {0}。{1}	Region {0}. {1}
+Restored	客户端已恢复 {0}	League restored to {0}
+LocaleVerified	已核对客户端启动语言。	The startup language was verified.
+ChineseStarted	客户端已用大陆简中启动	League started in Simplified Chinese
+AssetsFound	已检测到文字和语音资源。	Text and voice assets were detected.
+AssetsUncertain	语音包状态待确认，可先在 Riot 检查更新。	Voice assets still need verification. Check for updates in Riot.
+NoBackup	暂无原语言记录	No original language saved
+InGame	当前正在对局	Match in progress
+InGameHint	退出对局和英雄联盟大厅后，再切换游戏语言。	Exit the match and the League lobby before switching.
+LobbyOpen	英雄联盟大厅已打开	League is already open
+LobbyHint	先退出英雄联盟大厅，再切换游戏语言。	Exit the League lobby before switching.
+RiotUpdating	Riot 正在更新	Riot is updating
+RiotUpdatingHint	等当前更新完成后再切换语言。	Wait for the current update to finish before switching.
+RiotStarting	正在启动 Riot	Starting Riot
+RiotStartingAuto	等启动器就绪后会自动请求打开英雄联盟。	The launcher will ask Riot to open League once it starts.
+RiotStartingManual	Riot 打开后，在英雄联盟页面点「更新」或「游玩」。	Open League in Riot and click Update or Play.
+MatchStarted	检测到对局已开始	A match has started
+MatchStartedHint	语言设置将在下次启动客户端时重新读取。	League will read the language setting again next time it starts.
+WrongLocale	Riot 用了 {0}	Riot started in {0}
+WrongLocaleHint	先退出大厅和托盘里的 Riot 客户端，再通过这里重试。	Exit the lobby and quit Riot from the system tray, then retry here.
+Downloading	Riot 正在下载或安装语言资源	Riot is installing language files
+DownloadingHint	保持启动器打开。下载完成后，在 Riot 客户端点「游玩」。	Keep this window open. Click Play in Riot when the download finishes.
+AssetsReady	语言资源就绪	Language files ready
+AssetsReadyHint	在 Riot 客户端点「游玩」。这里会自动确认大厅语言。	Click Play in Riot. The launcher will verify the lobby language.
+WaitUpdate	等待 Riot 开始更新	Waiting for Riot to update
+WaitUpdateHint	在 Riot 客户端点「更新」或「游玩」。如果仍显示旧语言，退出 Riot 后再试。	Click Update or Play in Riot. If the old language is still shown, quit Riot and retry.
+WaitRiot	等待 Riot 加载资源	Waiting for Riot to load files
+WaitRiotHint	若 Riot 显示「更新」或「游玩」，点一次即可。	Click Update or Play if Riot offers it.
+WaitEnded	等待已结束	Wait ended
+WaitEndedHint	检查 Riot 的更新状态，或退出 Riot 后再试一次。	Check the Riot update, or quit Riot and retry.
+WaitDownload	如果 Riot 还在下载，等完成后再通过这个工具启动。	If Riot is still downloading, wait for it to finish and launch here again.
+Locale.zh_CN	中文（中国大陆）	Simplified Chinese
+Locale.zh_TW	中文（台湾）	Chinese (Taiwan)
+Locale.zh_MY	中文（马来西亚）	Chinese (Malaysia)
+Locale.en_US	英语（美国）	English (US)
+Locale.ja_JP	日语	Japanese
