@@ -15,8 +15,8 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.1.4.0")]
-[assembly: AssemblyFileVersion("1.1.4.0")]
+[assembly: AssemblyVersion("1.1.5.0")]
+[assembly: AssemblyFileVersion("1.1.5.0")]
 
 internal static class Program
 {

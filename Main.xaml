@@ -220,7 +220,7 @@
       </Style>
     </ScrollViewer.Resources>
     <StackPanel Margin="24,0,24,12" MaxWidth="650">
-      <StackPanel x:Name="HomePanel">
+      <StackPanel x:Name="HomePanel" Margin="0,6,0,0">
         <Border Padding="20,13" CornerRadius="10" Background="{DynamicResource Hero}"
                 BorderThickness="1" BorderBrush="{DynamicResource Hero}">
           <StackPanel>
