@@ -15,8 +15,8 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.1.5.0")]
-[assembly: AssemblyFileVersion("1.1.5.0")]
+[assembly: AssemblyVersion("1.1.6.0")]
+[assembly: AssemblyFileVersion("1.1.6.0")]
 
 internal static class Program
 {
@@ -63,14 +63,11 @@ internal sealed class LauncherWindow
     private readonly TextBlock title;
     private readonly TextBlock detail;
     private readonly ProgressBar bar;
+    private readonly FrameworkElement progressRow;
     private readonly TextBlock progressText;
-    private readonly Button settingsButton;
-    private readonly Button backButton;
     private readonly Button themeButton;
     private readonly System.Windows.Shapes.Path themeGlyph;
-    private readonly FrameworkElement homePanel;
     private readonly FrameworkElement settingsPanel;
-    private readonly ScrollViewer pageScroll;
     private readonly TextBlock settingsFeedback;
     private readonly Button autoPathButton;
     private readonly Button manualPathButton;
@@ -101,22 +98,22 @@ internal sealed class LauncherWindow
         title = (TextBlock)view.FindName("StateTitle");
         detail = (TextBlock)view.FindName("StateDetail");
         bar = (ProgressBar)view.FindName("Progress");
+        progressRow = (FrameworkElement)view.FindName("ProgressRow");
         progressText = (TextBlock)view.FindName("ProgressText");
-        settingsButton = (Button)view.FindName("SettingsButton");
-        backButton = (Button)view.FindName("BackButton");
+        var settingsButton = (Button)view.FindName("SettingsButton");
         themeButton = (Button)view.FindName("ThemeButton");
         themeGlyph = (System.Windows.Shapes.Path)view.FindName("ThemeGlyph");
-        homePanel = (FrameworkElement)view.FindName("HomePanel");
         settingsPanel = (FrameworkElement)view.FindName("SettingsPanel");
-        pageScroll = (ScrollViewer)view.FindName("PageScroll");
         settingsFeedback = (TextBlock)view.FindName("SettingsFeedback");
         autoPathButton = (Button)view.FindName("AutoPathButton");
         manualPathButton = (Button)view.FindName("ManualPathButton");
         installPath = (TextBlock)view.FindName("InstallPath");
         start.Click += OnStart;
         restore.Click += OnRestore;
-        settingsButton.Click += (sender, args) => ShowSettings(true);
-        backButton.Click += (sender, args) => ShowSettings(false);
+        settingsButton.Click += (sender, args) => {
+            settingsPanel.BringIntoView();
+            AnimateEntrance(settingsPanel);
+        };
         themeButton.Click += (sender, args) => SetTheme(darkTheme ? ThemeMode.Light : ThemeMode.Dark);
         var systemThemeItem = (MenuItem)view.FindName("SystemThemeItem");
         systemThemeItem.Click += (sender, args) => SetTheme(ThemeMode.System);
@@ -203,6 +200,7 @@ internal sealed class LauncherWindow
 
     private void SavePreferences()
     {
+        settingsFeedback.Visibility = Visibility.Visible;
         try
         {
             preferences.Save(preferencesPath);
@@ -229,24 +227,13 @@ internal sealed class LauncherWindow
         themeButton.IsEnabled = !SystemParameters.HighContrast;
     }
 
-    private void AnimateEntrance(FrameworkElement element, double horizontalOffset = 0)
+    private void AnimateEntrance(FrameworkElement element)
     {
         if (!window.IsLoaded || !SystemParameters.ClientAreaAnimation) return;
-        element.BeginAnimation(UIElement.OpacityProperty, EntranceAnimation(0.6, 1));
-        if (horizontalOffset != 0)
-        {
-            var translation = new TranslateTransform();
-            element.RenderTransform = translation;
-            translation.BeginAnimation(TranslateTransform.XProperty, EntranceAnimation(horizontalOffset, 0));
-        }
-    }
-
-    private static DoubleAnimation EntranceAnimation(double from, double to)
-    {
-        return new DoubleAnimation(from, to, TimeSpan.FromMilliseconds(200)) {
+        element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0.6, 1, TimeSpan.FromMilliseconds(200)) {
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
             FillBehavior = FillBehavior.Stop
-        };
+        });
     }
 
     private void FitWindowToScreen()
@@ -275,17 +262,6 @@ internal sealed class LauncherWindow
     {
         if (window.Dispatcher.HasShutdownStarted) return;
         window.Dispatcher.BeginInvoke(new Action(ApplyTheme));
-    }
-
-    private void ShowSettings(bool show)
-    {
-        homePanel.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
-        settingsPanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        settingsButton.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
-        backButton.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        pageScroll.ScrollToTop();
-        AnimateEntrance(show ? settingsPanel : homePanel, show ? 12 : -12);
-        (show ? backButton : settingsButton).Focus();
     }
 
     public void Initialize(LeagueInstall installation = null)
@@ -318,8 +294,7 @@ internal sealed class LauncherWindow
         title.Text = status.Title.Render(text);
         AutomationProperties.SetName(title, title.Text);
         detail.Text = status.Detail.Render(text);
-        bar.Visibility = status.Percent.HasValue ? Visibility.Visible : Visibility.Hidden;
-        progressText.Visibility = bar.Visibility;
+        progressRow.Visibility = status.Percent.HasValue ? Visibility.Visible : Visibility.Collapsed;
         if (status.Percent.HasValue)
         {
             bar.Value = status.Percent.Value;

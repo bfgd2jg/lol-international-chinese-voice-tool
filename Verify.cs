@@ -98,18 +98,16 @@ internal static class Verify
         Require(AreDpiAwarenessContextsEqual(dpiAwareness, new IntPtr(-4))
             || AreDpiAwarenessContextsEqual(dpiAwareness, new IntPtr(-3)));
         var settings = (Button)window.FindName("SettingsButton");
-        var back = (Button)window.FindName("BackButton");
+        var settingsPanel = (FrameworkElement)window.FindName("SettingsPanel");
+        var start = (Button)window.FindName("StartButton");
         var theme = (Button)window.FindName("ThemeButton");
         var scroll = (ScrollViewer)window.FindName("PageScroll");
-        Require(back.Visibility == Visibility.Collapsed);
-        settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        Require(((FrameworkElement)window.FindName("SettingsPanel")).Visibility == Visibility.Visible
-            && back.Visibility == Visibility.Visible && settings.Visibility == Visibility.Collapsed);
+        Require(settingsPanel.Visibility == Visibility.Visible && start.Visibility == Visibility.Visible);
         Require(AutomationProperties.GetName(theme) == "切换为深色模式");
         Draw(window, 404, 431, Path.Combine(root, "settings-light.png"));
         theme.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((RadioButton)window.FindName("UiEnglish")).IsChecked = true;
-        Require(AutomationProperties.GetName(back) == "Back to home"
+        Require(AutomationProperties.GetName(settings) == "Settings"
             && AutomationProperties.GetName(theme) == "Switch to light theme");
         Require(((TextBlock)window.FindName("InstallPath")).Text.StartsWith("Auto-detect"));
         Require(((TextBlock)window.FindName("StateTitle")).Text == "Current setting: Chinese (Taiwan)");
@@ -119,19 +117,16 @@ internal static class Verify
         Draw(window, 404, 431, Path.Combine(root, "settings-dark.png"));
         Draw(window, 340, 285, Path.Combine(root, "settings-compact.png"), 144);
         var view = (FrameworkElement)window.Content;
-        Point backPosition = back.TranslatePoint(new Point(), view);
-        scroll.ScrollToEnd();
+        Point gearPosition = settings.TranslatePoint(new Point(), view);
+        settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         view.UpdateLayout();
-        Require(scroll.VerticalOffset > 0 && back.TranslatePoint(new Point(), view) == backPosition);
-        back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        Require(((FrameworkElement)window.FindName("HomePanel")).Visibility == Visibility.Visible
-            && back.Visibility == Visibility.Collapsed && settings.Visibility == Visibility.Visible);
-        Require(AutomationProperties.GetName(settings) == "Settings");
+        Require(scroll.VerticalOffset > 0 && settings.TranslatePoint(new Point(), view) == gearPosition
+            && settingsPanel.Visibility == Visibility.Visible && start.Visibility == Visibility.Visible);
+        scroll.ScrollToTop();
         Draw(window, 404, 431, Path.Combine(root, "home-dark.png"), 144);
         Require(scroll.ScrollableHeight == 0);
-        settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((RadioButton)window.FindName("UiChinese")).IsChecked = true;
-        Require(AutomationProperties.GetName(back) == "返回首页");
+        Require(AutomationProperties.GetName(settings) == "设置");
         ((TextBlock)window.FindName("InstallPath")).Text = @"自动识别 · D:\Riot Games\League of Legends";
         Draw(window, 404, 431, Path.Combine(root, "settings-dark-125.png"), 120);
         var manualPath = (Button)window.FindName("ManualPathButton");
@@ -141,16 +136,14 @@ internal static class Verify
         pathButtons.Children.Add(focusCue);
         Draw(window, 404, 431, Path.Combine(root, "settings-compact-150.png"), 144);
         pathButtons.Children.Remove(focusCue);
-        back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((TextBlock)window.FindName("StateTitle")).Text = "Riot 正在下载或安装语言资源";
         ((TextBlock)window.FindName("StateDetail")).Text = "保持启动器打开。下载完成后，在 Riot 客户端点「游玩」。";
         var progress = (ProgressBar)window.FindName("Progress");
-        progress.Visibility = Visibility.Visible;
+        ((FrameworkElement)window.FindName("ProgressRow")).Visibility = Visibility.Visible;
         progress.Value = 63;
         var percent = (TextBlock)window.FindName("ProgressText");
         percent.Text = "63%";
-        percent.Visibility = Visibility.Visible;
-        ((Button)window.FindName("StartButton")).Content = "停止等待";
+        start.Content = "停止等待";
         Draw(window, 404, 431, Path.Combine(root, "progress-compact.png"), 192);
         Draw(window, 344, 300, Path.Combine(root, "progress-small-screen.png"), 192);
         scroll.ScrollToEnd();

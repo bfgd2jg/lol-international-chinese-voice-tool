@@ -1,14 +1,10 @@
 AppTitle	LOL国际服改中文语音工具	LoL International Chinese Voice Tool
 Brand	LOL国际服改中文语音工具	LoL Chinese Voice Tool
 Settings	设置	Settings
-Back	返回首页	Back to home
-HeroTitle	LOL国际服改中文语音工具	LoL Chinese Voice Tool
-HeroDetail	切换国际服的文字和英雄语音	Switch the international client’s text and champion voices
 Checking	正在检查安装	Checking installation
 UpdateProgress	语言资源更新进度	Language download progress
 Start	切换为简中	Switch to Chinese
 Restore	恢复原语言	Restore language
-Footnote	工具会自动等待语言资源并确认启动语言。按 Riot 提示点「更新」或「游玩」。	The tool waits for language files and verifies League's startup language. Click Update or Play in Riot when prompted.
 ThemeSystem	跟随系统	System
 ThemeLight	切换为浅色模式	Switch to light theme
 ThemeDark	切换为深色模式	Switch to dark theme
@@ -25,13 +21,12 @@ PathUnknown	未识别到安装位置	Install location not detected
 ChooseGame	选择英雄联盟安装目录里的 LeagueClient.exe	Select LeagueClient.exe in your League installation
 ChooseFilter	英雄联盟客户端 (LeagueClient.exe)|LeagueClient.exe	League Client (LeagueClient.exe)|LeagueClient.exe
 ManualPathInvalid	请选择安装目录中的 LeagueClient.exe。	Select LeagueClient.exe in the installation directory.
-PrefsHint	设置自动保存。	Settings save automatically.
 PrefsSaved	设置已保存。	Settings saved.
 PrefsFailure	无法保存。当前设置在这次打开期间有效。	Couldn't save settings. Changes apply for this session.
 AlreadyRunning	启动器已经打开。	The launcher is already open.
 ConfigCurrent	当前设置为 {0}	Current setting: {0}
 ConfigChinese	可通过下方按钮打开 Riot，再手动点「游玩」。	Use the button below to open Riot, then click Play.
-ConfigOther	点下方按钮切换到大陆简中。资源由 Riot 客户端下载。	Use the button below to switch to Simplified Chinese. Riot downloads the language files.
+ConfigOther	点下方按钮打开 Riot，再按提示点「更新」或「游玩」。	Switch to Chinese, then click Update or Play in Riot when prompted.
 InstallUnrecognized	暂时无法识别安装	Installation not recognized
 Stop	停止等待	Stop waiting
 RetryInstall	重新检查安装	Check installation again

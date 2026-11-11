@@ -6,7 +6,6 @@
         UseLayoutRounding="True" SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Display">
   <Window.Resources>
     <Geometry x:Key="GearIcon">M 10,2.5 L 14,2.5 14.7,5.2 16.4,6.2 19.1,5.5 21.1,9 19.2,11 19.2,13 21.1,15 19.1,18.5 16.4,17.8 14.7,18.8 14,21.5 10,21.5 9.3,18.8 7.6,17.8 4.9,18.5 2.9,15 4.8,13 4.8,11 2.9,9 4.9,5.5 7.6,6.2 9.3,5.2 Z M 15,12 A 3,3 0 1 0 9,12 A 3,3 0 1 0 15,12 Z</Geometry>
-    <Geometry x:Key="BackIcon">M 20,12 L 4,12 M 11,5 L 4,12 11,19</Geometry>
     <Geometry x:Key="MoonIcon">M 20.6,15.4 A 9,9 0 0 1 8.6,3.4 A 9,9 0 1 0 20.6,15.4 Z</Geometry>
     <Geometry x:Key="SunIcon">M 16,12 A 4,4 0 1 0 8,12 A 4,4 0 1 0 16,12 Z M 12,2 L 12,4 M 12,20 L 12,22 M 2,12 L 4,12 M 20,12 L 22,12 M 5,5 L 6.5,6.5 M 17.5,17.5 L 19,19 M 19,5 L 17.5,6.5 M 6.5,17.5 L 5,19</Geometry>
     <Style TargetType="TextBlock">
@@ -101,10 +100,10 @@
           <ControlTemplate TargetType="RadioButton">
             <Grid Background="Transparent">
               <Border x:Name="ChoiceSurface" Background="{TemplateBinding Background}"
-                      BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="7" Padding="6,3">
+                      BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="7" Margin="1" Padding="6,3">
                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
               </Border>
-              <Border x:Name="ChoiceHighlight" BorderBrush="{DynamicResource Focus}" BorderThickness="2"
+              <Border x:Name="ChoiceHighlight" Margin="1" BorderBrush="{DynamicResource Focus}" BorderThickness="2"
                       CornerRadius="7" IsHitTestVisible="False" Visibility="Collapsed"/>
             </Grid>
             <ControlTemplate.Triggers>
@@ -174,16 +173,10 @@
           </Button.ContextMenu>
           <Path x:Name="ThemeGlyph" Style="{StaticResource ToolbarGlyph}"/>
         </Button>
-        <Grid>
-          <Button x:Name="SettingsButton" Style="{StaticResource ToolbarButton}"
-                  ToolTip="{DynamicResource Settings}" AutomationProperties.Name="{DynamicResource Settings}">
-            <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource GearIcon}"/>
-          </Button>
-          <Button x:Name="BackButton" Style="{StaticResource ToolbarButton}" Visibility="Collapsed"
-                  ToolTip="{DynamicResource Back}" AutomationProperties.Name="{DynamicResource Back}">
-            <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource BackIcon}"/>
-          </Button>
-        </Grid>
+        <Button x:Name="SettingsButton" Style="{StaticResource ToolbarButton}"
+                ToolTip="{DynamicResource Settings}" AutomationProperties.Name="{DynamicResource Settings}">
+          <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource GearIcon}"/>
+        </Button>
       </StackPanel>
     </Grid>
   <ScrollViewer Grid.Row="1" x:Name="PageScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
@@ -219,63 +212,49 @@
         </Setter>
       </Style>
     </ScrollViewer.Resources>
-    <StackPanel Margin="24,0,24,12" MaxWidth="650">
-      <StackPanel x:Name="HomePanel" Margin="0,6,0,0">
-        <Border Padding="20,13" CornerRadius="10" Background="{DynamicResource Hero}"
-                BorderThickness="1" BorderBrush="{DynamicResource Hero}">
-          <StackPanel>
-            <TextBlock Text="{DynamicResource HeroTitle}" Foreground="{DynamicResource HeroInk}" FontSize="24" FontWeight="SemiBold"/>
-            <TextBlock Text="{DynamicResource HeroDetail}" Foreground="{DynamicResource HeroMuted}" Margin="0,6,0,0"/>
-          </StackPanel>
-        </Border>
-        <Border Style="{StaticResource Card}" Margin="0,10,0,0" Padding="18,12" MinHeight="112">
+    <StackPanel Margin="24,0,24,8" MaxWidth="650">
+        <Border Style="{StaticResource Card}" Margin="0,6,0,0" Padding="14,8">
           <StackPanel>
             <TextBlock x:Name="StateTitle" FontSize="17" FontWeight="SemiBold" Text="{DynamicResource Checking}"/>
-            <TextBlock x:Name="StateDetail" Foreground="{DynamicResource Muted}" Margin="0,6,0,0"
-                       MinHeight="40" LineHeight="20"/>
-            <Grid Margin="0,6,0,0">
+            <TextBlock x:Name="StateDetail" Foreground="{DynamicResource Muted}" Margin="0,4,0,0"
+                       LineHeight="20"/>
+            <Grid x:Name="ProgressRow" Margin="0,6,0,0" Visibility="Collapsed">
               <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
               <ProgressBar x:Name="Progress" Style="{StaticResource ProgressStyle}" Minimum="0" Maximum="100"
-                           AutomationProperties.Name="{DynamicResource UpdateProgress}" Visibility="Hidden"/>
+                           AutomationProperties.Name="{DynamicResource UpdateProgress}"/>
               <TextBlock x:Name="ProgressText" Grid.Column="1" Text="" Foreground="{DynamicResource Muted}"
-                         FontSize="12" Margin="10,0,0,0" Visibility="Hidden"/>
+                         FontSize="12" Margin="10,0,0,0"/>
             </Grid>
           </StackPanel>
         </Border>
-        <Grid Margin="0,10,0,0">
+        <Grid Margin="0,8,0,0">
           <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
           <Button x:Name="StartButton" IsDefault="True" Style="{StaticResource ActionButton}" Content="{DynamicResource Start}"/>
           <Button x:Name="RestoreButton" Grid.Column="1" Margin="10,0,0,0" Style="{StaticResource SecondaryButton}"
                   Content="{DynamicResource Restore}"/>
         </Grid>
-        <TextBlock Foreground="{DynamicResource Muted}" FontSize="13" Margin="0,9,0,0" LineHeight="20"
-                   Text="{DynamicResource Footnote}"/>
-      </StackPanel>
-      <StackPanel x:Name="SettingsPanel" Visibility="Collapsed">
-        <TextBlock Text="{DynamicResource Settings}" FontSize="25" FontWeight="SemiBold" Margin="0,1,0,12"/>
-        <Border Style="{StaticResource Card}" Padding="16,10">
+        <Border x:Name="SettingsPanel" Style="{StaticResource Card}" Padding="14,8" Margin="0,8,0,0"
+                AutomationProperties.Name="{DynamicResource Settings}">
           <StackPanel>
-            <TextBlock Text="{DynamicResource UiLanguage}" FontWeight="SemiBold"/>
-            <UniformGrid Columns="2" Margin="0,8,0,0">
+            <Grid>
+              <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition/></Grid.ColumnDefinitions>
+              <TextBlock Text="{DynamicResource UiLanguage}" FontWeight="SemiBold"/>
+              <TextBlock x:Name="SettingsFeedback" Grid.Column="1" Visibility="Collapsed" TextAlignment="Right"
+                         Foreground="{DynamicResource Muted}" FontSize="13" Margin="8,0,0,0"/>
+            </Grid>
+            <UniformGrid Columns="2" Margin="0,6,0,0">
               <RadioButton x:Name="UiChinese" GroupName="UiLanguage" Content="简体中文" Style="{StaticResource Choice}"/>
               <RadioButton x:Name="UiEnglish" GroupName="UiLanguage" Content="English" Style="{StaticResource Choice}" Margin="8,0,0,0"/>
             </UniformGrid>
-          </StackPanel>
-        </Border>
-        <Border Style="{StaticResource Card}" Padding="16,10" Margin="0,10,0,0">
-          <StackPanel>
-            <TextBlock Text="{DynamicResource InstallLocation}" FontWeight="SemiBold"/>
-            <TextBlock x:Name="InstallPath" Margin="0,6,0,0" Foreground="{DynamicResource Muted}"/>
-            <Grid Margin="0,8,0,0">
+            <TextBlock Text="{DynamicResource InstallLocation}" FontWeight="SemiBold" Margin="0,10,0,0"/>
+            <TextBlock x:Name="InstallPath" Margin="0,4,0,0" Foreground="{DynamicResource Muted}"/>
+            <Grid Margin="0,6,0,0">
               <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="8"/><ColumnDefinition/></Grid.ColumnDefinitions>
               <Button x:Name="AutoPathButton" Content="{DynamicResource AutoDetect}" Style="{StaticResource SecondaryButton}"/>
               <Button x:Name="ManualPathButton" Grid.Column="2" Content="{DynamicResource ChoosePath}" Style="{StaticResource SecondaryButton}"/>
             </Grid>
           </StackPanel>
         </Border>
-        <TextBlock x:Name="SettingsFeedback" Text="{DynamicResource PrefsHint}"
-                   Foreground="{DynamicResource Muted}" FontSize="13" Margin="0,10,0,0"/>
-      </StackPanel>
     </StackPanel>
   </ScrollViewer>
   </Grid>

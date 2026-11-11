@@ -9,17 +9,17 @@ using Microsoft.Win32;
 internal static class WindowTheme
 {
     private static readonly string[] Keys = {
-        "Canvas", "Panel", "Ink", "Muted", "Border", "Hero", "HeroInk", "HeroMuted",
+        "Canvas", "Panel", "Ink", "Muted", "Border",
         "Accent", "AccentInk", "Selected", "SelectedInk", "Focus", "Track", "DisabledInk"
     };
 
     private static readonly string[] Light = {
-        "#F2F5FA", "#FFFFFF", "#142238", "#445772", "#8295B0", "#183762", "#F7FAFF", "#DAE6FB",
+        "#F2F5FA", "#FFFFFF", "#142238", "#445772", "#8295B0",
         "#1F55CC", "#FFFFFF", "#E7EFFF", "#173F8E", "#164BB4", "#D8E2F0", "#596A81"
     };
 
     private static readonly string[] Dark = {
-        "#101722", "#182232", "#F3F6FC", "#B7C6DB", "#617994", "#213652", "#F7FAFF", "#C7D9F2",
+        "#101722", "#182232", "#F3F6FC", "#B7C6DB", "#617994",
         "#8AB0FF", "#101D36", "#283D60", "#DCE8FF", "#9BBCFF", "#34455C", "#96AAC3"
     };
 
@@ -30,7 +30,7 @@ internal static class WindowTheme
         string[] palette = dark ? Dark : Light;
         Brush[] system = highContrast ? new Brush[] {
             SystemColors.WindowBrush, SystemColors.WindowBrush, SystemColors.WindowTextBrush, SystemColors.WindowTextBrush,
-            SystemColors.WindowTextBrush, SystemColors.WindowBrush, SystemColors.WindowTextBrush, SystemColors.WindowTextBrush,
+            SystemColors.WindowTextBrush,
             SystemColors.HighlightBrush, SystemColors.HighlightTextBrush, SystemColors.HighlightBrush, SystemColors.HighlightTextBrush,
             SystemColors.WindowTextBrush, SystemColors.ControlBrush, SystemColors.GrayTextBrush
         } : null;
