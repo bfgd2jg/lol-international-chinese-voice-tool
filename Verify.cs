@@ -73,9 +73,14 @@ internal static class Verify
         string appData = Path.Combine(root, "preferences");
         Directory.CreateDirectory(appData);
         string preferenceFile = Path.Combine(appData, "preferences.json");
+        File.WriteAllText(preferenceFile, "{\"Theme\":2,\"UiLanguage\":\"en-US\",\"OpenGameAutomatically\":false,\"WaitMinutes\":45}");
+        var legacy = LauncherPreferences.Load(preferenceFile);
+        Require(legacy.Theme == ThemeMode.Dark && legacy.UiLanguage == "en-US" && !legacy.OpenGameAutomatically);
+        legacy.Save(preferenceFile);
+        Require(!File.ReadAllText(preferenceFile).Contains("WaitMinutes"));
         File.WriteAllText(preferenceFile, "broken json");
         LauncherPreferences defaults = LauncherPreferences.Load(preferenceFile);
-        Require(defaults.Theme == ThemeMode.System && defaults.OpenGameAutomatically && defaults.WaitMinutes == 20
+        Require(defaults.Theme == ThemeMode.System && defaults.OpenGameAutomatically
             && defaults.UiLanguage == "zh-CN" && defaults.GamePath == null);
         var app = new Application();
         Window window = Program.LoadWindow();
@@ -88,15 +93,14 @@ internal static class Verify
         Draw(window, 604, 663, Path.Combine(root, "settings-light.png"));
         ((RadioButton)window.FindName("ThemeDark")).IsChecked = true;
         ((RadioButton)window.FindName("LaunchManual")).IsChecked = true;
-        ((RadioButton)window.FindName("Wait45")).IsChecked = true;
         ((RadioButton)window.FindName("UiEnglish")).IsChecked = true;
         Require((string)settings.Content == "Back");
         Require(((TextBlock)window.FindName("InstallPath")).Text.StartsWith("Auto-detect"));
         Require(((TextBlock)window.FindName("StateTitle")).Text == "Current setting: Chinese (Taiwan)");
         LauncherPreferences saved = LauncherPreferences.Load(preferenceFile);
-        Require(saved.Theme == ThemeMode.Dark && !saved.OpenGameAutomatically && saved.WaitMinutes == 45 && saved.UiLanguage == "en-US");
+        Require(saved.Theme == ThemeMode.Dark && !saved.OpenGameAutomatically && saved.UiLanguage == "en-US");
         ((TextBlock)window.FindName("InstallPath")).Text = @"Auto-detect · D:\Riot Games\League of Legends";
-        Draw(window, 604, 703, Path.Combine(root, "settings-dark.png"));
+        Draw(window, 604, 603, Path.Combine(root, "settings-dark.png"));
         Draw(window, 404, 431, Path.Combine(root, "settings-compact.png"));
         settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Require(((FrameworkElement)window.FindName("HomePanel")).Visibility == Visibility.Visible);
@@ -122,7 +126,6 @@ internal static class Verify
         new LauncherWindow(reopened, appData).Initialize(install);
         Require(((RadioButton)reopened.FindName("ThemeDark")).IsChecked == true);
         Require(((RadioButton)reopened.FindName("LaunchManual")).IsChecked == true);
-        Require(((RadioButton)reopened.FindName("Wait45")).IsChecked == true);
         Require(((RadioButton)reopened.FindName("UiEnglish")).IsChecked == true);
         Require(((TextBlock)reopened.FindName("InstallPath")).Text == "Manual · " + game);
         window.Close();

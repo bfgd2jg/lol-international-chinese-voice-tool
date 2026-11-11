@@ -10,10 +10,10 @@ using System.Windows.Controls;
 using System.Windows.Markup;
 using Microsoft.Win32;
 
-[assembly: AssemblyTitle("英雄联盟大陆简中启动器")]
+[assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.1.0.0")]
-[assembly: AssemblyFileVersion("1.1.0.0")]
+[assembly: AssemblyVersion("1.1.1.0")]
+[assembly: AssemblyFileVersion("1.1.1.0")]
 
 internal static class Program
 {
@@ -134,16 +134,6 @@ internal sealed class LauncherWindow
         manual.IsChecked = !preferences.OpenGameAutomatically;
         automatic.Checked += (sender, args) => SetAutoOpen(true);
         manual.Checked += (sender, args) => SetAutoOpen(false);
-        foreach (string name in new[] { "Wait20", "Wait45", "Wait90" })
-        {
-            var choice = (RadioButton)window.FindName(name);
-            int minutes = Int32.Parse((string)choice.Tag, CultureInfo.InvariantCulture);
-            choice.IsChecked = preferences.WaitMinutes == minutes;
-            choice.Checked += (sender, args) => {
-                preferences.WaitMinutes = minutes;
-                SavePreferences();
-            };
-        }
     }
 
     private void SetUiLanguage(string language)
@@ -308,12 +298,11 @@ internal sealed class LauncherWindow
         Buttons();
         Show(new LaunchStatus(restoring ? "Restoring" : "Preparing", "CheckingProcesses"));
         bool autoOpen = preferences.OpenGameAutomatically;
-        var wait = TimeSpan.FromMinutes(preferences.WaitMinutes);
         try
         {
             LaunchStatus result = await Task.Run(() => restoring
-                ? engine.Restore(autoOpen, wait, progress, cancel.Token)
-                : engine.SwitchAndLaunch(autoOpen, wait, progress, cancel.Token), cancel.Token);
+                ? engine.Restore(autoOpen, progress, cancel.Token)
+                : engine.SwitchAndLaunch(autoOpen, progress, cancel.Token), cancel.Token);
             Show(result);
         }
         catch (OperationCanceledException)

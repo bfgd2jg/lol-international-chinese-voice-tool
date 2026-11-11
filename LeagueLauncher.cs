@@ -222,19 +222,19 @@ internal sealed class LeagueLauncher
         return new LaunchStatus(title, detail, files ? 100 : (double?)null);
     }
 
-    public Task<LaunchStatus> SwitchAndLaunch(bool autoOpen, TimeSpan wait, IProgress<LaunchStatus> progress, CancellationToken cancel)
+    public Task<LaunchStatus> SwitchAndLaunch(bool autoOpen, IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
-        return UseLanguage(Chinese, autoOpen, wait, progress, cancel);
+        return UseLanguage(Chinese, autoOpen, progress, cancel);
     }
 
-    public async Task<LaunchStatus> Restore(bool autoOpen, TimeSpan wait, IProgress<LaunchStatus> progress, CancellationToken cancel)
+    public async Task<LaunchStatus> Restore(bool autoOpen, IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
         string original = OriginalLocale;
         if (original == null) return new LaunchStatus("NoBackup", "RestoreUnavailable");
-        return await UseLanguage(original, autoOpen, wait, progress, cancel).ConfigureAwait(false);
+        return await UseLanguage(original, autoOpen, progress, cancel).ConfigureAwait(false);
     }
 
-    private async Task<LaunchStatus> UseLanguage(string target, bool autoOpen, TimeSpan wait,
+    private async Task<LaunchStatus> UseLanguage(string target, bool autoOpen,
         IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
         if (GameRunning()) return new LaunchStatus("InGame", "InGameHint");
@@ -254,13 +254,13 @@ internal sealed class LeagueLauncher
         DateTime nextStatus = started;
         bool riotStarted = false;
         bool sawDownload = false;
-        bool restartHint = false;
+        DateTime? riotMissingSince = null;
         LaunchRiot(false);
         progress.Report(new LaunchStatus("RiotStarting", autoOpen
             ? "RiotStartingAuto"
             : "RiotStartingManual"));
 
-        while (DateTime.UtcNow - started < wait)
+        while (true)
         {
             cancel.ThrowIfCancellationRequested();
             if (GameRunning())
@@ -280,6 +280,13 @@ internal sealed class LeagueLauncher
             }
             if (now >= nextStatus)
             {
+                if (riotStarted && !ClientRunning() && !IsRunning("RiotClientServices", "RiotClientUx", "RiotClientUxRender"))
+                {
+                    if (!riotMissingSince.HasValue) riotMissingSince = now;
+                    if (now - riotMissingSince.Value >= TimeSpan.FromSeconds(10))
+                        return new LaunchStatus("RiotClosed", "RiotClosedHint");
+                }
+                else riotMissingSince = null;
                 Match patch = ReadPatchStatus(started.AddSeconds(-2));
                 if (patch != null && patch.Groups[1].Value == "Updating")
                 {
@@ -295,7 +302,6 @@ internal sealed class LeagueLauncher
                     progress.Report(new LaunchStatus("AssetsReady", "AssetsReadyHint", 100));
                 else if (riotStarted && now - started > TimeSpan.FromSeconds(50))
                 {
-                    restartHint = true;
                     progress.Report(new LaunchStatus("WaitUpdate",
                         "WaitUpdateHint"));
                 }
@@ -305,9 +311,6 @@ internal sealed class LeagueLauncher
             }
             await Task.Delay(300, cancel).ConfigureAwait(false);
         }
-        return new LaunchStatus("WaitEnded", restartHint
-            ? "WaitEndedHint"
-            : "WaitDownload");
     }
 
 }

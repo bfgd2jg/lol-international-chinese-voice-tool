@@ -11,14 +11,12 @@ internal sealed class LauncherPreferences
     public string UiLanguage { get; set; }
     public string GamePath { get; set; }
     public bool OpenGameAutomatically { get; set; }
-    public int WaitMinutes { get; set; }
 
     public LauncherPreferences()
     {
         Theme = ThemeMode.System;
         UiLanguage = "zh-CN";
         OpenGameAutomatically = true;
-        WaitMinutes = 20;
     }
 
     public static string AppDirectory { get { return Path.Combine(
@@ -33,8 +31,6 @@ internal sealed class LauncherPreferences
             {
                 if (!Enum.IsDefined(typeof(ThemeMode), settings.Theme)) settings.Theme = ThemeMode.System;
                 if (settings.UiLanguage != "en-US") settings.UiLanguage = "zh-CN";
-                if (settings.WaitMinutes != 20 && settings.WaitMinutes != 45 && settings.WaitMinutes != 90)
-                    settings.WaitMinutes = 20;
                 return settings;
             }
         }

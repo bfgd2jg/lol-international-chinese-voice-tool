@@ -1,14 +1,14 @@
-AppTitle	LOL 大陆简中启动器	LoL Simplified Chinese Launcher
-Brand	LOL 语言工具	LoL Language Tool
+AppTitle	LOL国际服改中文语音工具	LoL International Chinese Voice Tool
+Brand	LOL国际服改中文语音工具	LoL Chinese Voice Tool
 Settings	设置	Settings
 Back	返回	Back
-HeroTitle	大陆简中启动器	Simplified Chinese Launcher
+HeroTitle	LOL国际服改中文语音工具	LoL Chinese Voice Tool
 HeroDetail	切换国际服的文字和英雄语音	Switch the international client’s text and champion voices
 Checking	正在检查安装	Checking installation
 UpdateProgress	语言资源更新进度	Language download progress
 Start	切换简中并启动	Launch in Chinese
 Restore	恢复原语言	Restore language
-Footnote	第一次切换由 Riot 下载语言包。按提示点「更新」或「游玩」。	Riot downloads language files on first use. Click Update or Play when prompted.
+Footnote	工具会自动等待语言资源并确认启动语言。按 Riot 提示点「更新」或「游玩」。	The tool waits for language files and verifies League's startup language. Click Update or Play in Riot when prompted.
 Theme	界面主题	Theme
 ThemeSystem	跟随系统	System
 ThemeLight	浅色	Light
@@ -17,10 +17,6 @@ UiLanguage	启动器语言	Launcher language
 LaunchMode	启动方式	Launch behavior
 AutoLaunch	自动打开英雄联盟	Open League automatically
 ManualLaunch	在 Riot 手动点游玩	Click Play in Riot
-WaitTime	等待语言资源的时间	Language download wait
-Wait20	20 分钟	20 min
-Wait45	45 分钟	45 min
-Wait90	90 分钟	90 min
 InstallLocation	游戏安装位置	Game installation
 AutoDetect	使用自动识别	Use auto-detect
 ChoosePath	手动选择	Choose manually
@@ -90,9 +86,8 @@ WaitUpdate	等待 Riot 开始更新	Waiting for Riot to update
 WaitUpdateHint	在 Riot 客户端点「更新」或「游玩」。如果仍显示旧语言，退出 Riot 后再试。	Click Update or Play in Riot. If the old language is still shown, quit Riot and retry.
 WaitRiot	等待 Riot 加载资源	Waiting for Riot to load files
 WaitRiotHint	若 Riot 显示「更新」或「游玩」，点一次即可。	Click Update or Play if Riot offers it.
-WaitEnded	等待已结束	Wait ended
-WaitEndedHint	检查 Riot 的更新状态，或退出 Riot 后再试一次。	Check the Riot update, or quit Riot and retry.
-WaitDownload	如果 Riot 还在下载，等完成后再通过这个工具启动。	If Riot is still downloading, wait for it to finish and launch here again.
+RiotClosed	Riot 客户端已退出	Riot Client has closed
+RiotClosedHint	已结束等待。重新打开工具启动，即可继续检查语言资源。	Waiting has ended. Launch here again to check your language files.
 Locale.zh_CN	中文（中国大陆）	Simplified Chinese
 Locale.zh_TW	中文（台湾）	Chinese (Taiwan)
 Locale.zh_MY	中文（马来西亚）	Chinese (Malaysia)
