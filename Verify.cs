@@ -91,7 +91,7 @@ internal static class Verify
         var app = new Application();
         Window window = Program.LoadWindow();
         Require(window.Width == 420 && window.Width == window.MinWidth
-            && window.Height == 470 && window.Height == window.MinHeight);
+            && window.Height == 380 && window.Height == window.MinHeight);
         new LauncherWindow(window, appData).Initialize(install);
         var handle = new System.Windows.Interop.WindowInteropHelper(window).EnsureHandle();
         IntPtr dpiAwareness = GetWindowDpiAwarenessContext(handle);
@@ -105,7 +105,7 @@ internal static class Verify
         var scroll = (ScrollViewer)window.FindName("PageScroll");
         Require(!autoPathItem.IsEnabled && AutomationProperties.GetName(manualPath) == "手动选择");
         Require(AutomationProperties.GetName(theme) == "切换为深色模式");
-        Draw(window, 404, 431, Path.Combine(root, "settings-light.png"));
+        Draw(window, 404, 341, Path.Combine(root, "settings-light.png"));
         theme.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         language.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Require(AutomationProperties.GetName(language) == "Switch interface to Simplified Chinese"
@@ -115,15 +115,15 @@ internal static class Verify
         LauncherPreferences saved = LauncherPreferences.Load(preferenceFile);
         Require(saved.Theme == ThemeMode.Dark && saved.UiLanguage == "en-US");
         ((TextBlock)window.FindName("InstallPath")).Text = @"Auto-detect · D:\Riot Games\League of Legends";
-        Draw(window, 404, 431, Path.Combine(root, "settings-dark.png"));
+        Draw(window, 404, 341, Path.Combine(root, "settings-dark.png"));
         Draw(window, 340, 285, Path.Combine(root, "settings-compact.png"), 144);
-        Draw(window, 404, 431, Path.Combine(root, "home-dark.png"), 144);
+        Draw(window, 404, 341, Path.Combine(root, "home-dark.png"), 144);
         Require(scroll.ScrollableHeight == 0);
         language.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Require(AutomationProperties.GetName(language) == "切换为英文界面"
             && LauncherPreferences.Load(preferenceFile).UiLanguage == "zh-CN");
         ((TextBlock)window.FindName("InstallPath")).Text = @"自动识别 · D:\Riot Games\League of Legends";
-        Draw(window, 404, 431, Path.Combine(root, "settings-dark-125.png"), 120);
+        Draw(window, 404, 341, Path.Combine(root, "settings-dark-125.png"), 120);
         var pathButtons = (Grid)manualPath.Parent;
         double iconCenter = manualPath.TranslatePoint(new Point(0, manualPath.ActualHeight / 2), pathButtons).Y;
         Require(Math.Abs(iconCenter - pathButtons.ActualHeight / 2) <= 1);
@@ -133,7 +133,7 @@ internal static class Verify
         };
         Grid.SetColumn(focusCue, Grid.GetColumn(manualPath));
         pathButtons.Children.Add(focusCue);
-        Draw(window, 404, 431, Path.Combine(root, "settings-compact-150.png"), 144);
+        Draw(window, 404, 341, Path.Combine(root, "settings-compact-150.png"), 144);
         pathButtons.Children.Remove(focusCue);
         ((TextBlock)window.FindName("StateTitle")).Text = "Riot 正在下载或安装语言资源";
         ((TextBlock)window.FindName("StateDetail")).Text = "保持启动器打开。下载完成后，在 Riot 客户端点「游玩」。";
@@ -143,7 +143,7 @@ internal static class Verify
         var percent = (TextBlock)window.FindName("ProgressText");
         percent.Text = "63%";
         start.Content = "停止等待";
-        Draw(window, 404, 431, Path.Combine(root, "progress-compact.png"), 192);
+        Draw(window, 404, 341, Path.Combine(root, "progress-compact.png"), 192);
         Draw(window, 344, 215, Path.Combine(root, "progress-small-screen.png"), 192);
         var view = (FrameworkElement)window.Content;
         Point startPosition = start.TranslatePoint(new Point(), view);
