@@ -12,8 +12,8 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.1.1.0")]
-[assembly: AssemblyFileVersion("1.1.1.0")]
+[assembly: AssemblyVersion("1.1.2.0")]
+[assembly: AssemblyFileVersion("1.1.2.0")]
 
 internal static class Program
 {
@@ -55,6 +55,7 @@ internal sealed class LauncherWindow
     private readonly ProgressBar bar;
     private readonly TextBlock progressText;
     private readonly Button settingsButton;
+    private readonly Button backButton;
     private readonly FrameworkElement homePanel;
     private readonly FrameworkElement settingsPanel;
     private readonly ScrollViewer pageScroll;
@@ -85,6 +86,7 @@ internal sealed class LauncherWindow
         bar = (ProgressBar)view.FindName("Progress");
         progressText = (TextBlock)view.FindName("ProgressText");
         settingsButton = (Button)view.FindName("SettingsButton");
+        backButton = (Button)view.FindName("BackButton");
         homePanel = (FrameworkElement)view.FindName("HomePanel");
         settingsPanel = (FrameworkElement)view.FindName("SettingsPanel");
         pageScroll = (ScrollViewer)view.FindName("PageScroll");
@@ -94,7 +96,8 @@ internal sealed class LauncherWindow
         installPath = (TextBlock)view.FindName("InstallPath");
         start.Click += OnStart;
         restore.Click += OnRestore;
-        settingsButton.Click += (sender, args) => ShowSettings(settingsPanel.Visibility != Visibility.Visible);
+        settingsButton.Click += (sender, args) => ShowSettings(true);
+        backButton.Click += (sender, args) => ShowSettings(false);
         autoPathButton.Click += (sender, args) => SelectGamePath(null);
         manualPathButton.Click += ChooseGamePath;
         ConfigureSettings();
@@ -214,8 +217,10 @@ internal sealed class LauncherWindow
     {
         homePanel.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
         settingsPanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
-        settingsButton.SetResourceReference(ContentControl.ContentProperty, show ? "Back" : "Settings");
+        settingsButton.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+        backButton.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         pageScroll.ScrollToTop();
+        (show ? backButton : settingsButton).Focus();
     }
 
     public void Initialize(LeagueInstall installation = null)

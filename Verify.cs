@@ -87,14 +87,18 @@ internal static class Verify
         new LauncherWindow(window, appData).Initialize(install);
         new System.Windows.Interop.WindowInteropHelper(window).EnsureHandle();
         var settings = (Button)window.FindName("SettingsButton");
+        var back = (Button)window.FindName("BackButton");
+        var scroll = (ScrollViewer)window.FindName("PageScroll");
+        Require(back.Visibility == Visibility.Collapsed);
         settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        Require(((FrameworkElement)window.FindName("SettingsPanel")).Visibility == Visibility.Visible);
+        Require(((FrameworkElement)window.FindName("SettingsPanel")).Visibility == Visibility.Visible
+            && back.Visibility == Visibility.Visible && settings.Visibility == Visibility.Collapsed);
         ((RadioButton)window.FindName("ThemeLight")).IsChecked = true;
         Draw(window, 604, 663, Path.Combine(root, "settings-light.png"));
         ((RadioButton)window.FindName("ThemeDark")).IsChecked = true;
         ((RadioButton)window.FindName("LaunchManual")).IsChecked = true;
         ((RadioButton)window.FindName("UiEnglish")).IsChecked = true;
-        Require((string)settings.Content == "Back");
+        Require((string)back.Content == "Back to home");
         Require(((TextBlock)window.FindName("InstallPath")).Text.StartsWith("Auto-detect"));
         Require(((TextBlock)window.FindName("StateTitle")).Text == "Current setting: Chinese (Taiwan)");
         LauncherPreferences saved = LauncherPreferences.Load(preferenceFile);
@@ -102,14 +106,29 @@ internal static class Verify
         ((TextBlock)window.FindName("InstallPath")).Text = @"Auto-detect · D:\Riot Games\League of Legends";
         Draw(window, 604, 603, Path.Combine(root, "settings-dark.png"));
         Draw(window, 404, 431, Path.Combine(root, "settings-compact.png"));
-        settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-        Require(((FrameworkElement)window.FindName("HomePanel")).Visibility == Visibility.Visible);
+        var view = (FrameworkElement)window.Content;
+        Point backPosition = back.TranslatePoint(new Point(), view);
+        scroll.ScrollToEnd();
+        view.UpdateLayout();
+        Require(scroll.VerticalOffset > 0 && back.TranslatePoint(new Point(), view) == backPosition);
+        back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Require(((FrameworkElement)window.FindName("HomePanel")).Visibility == Visibility.Visible
+            && back.Visibility == Visibility.Collapsed && settings.Visibility == Visibility.Visible);
         Require((string)settings.Content == "Settings");
         Draw(window, 604, 531, Path.Combine(root, "home-dark.png"));
         settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((RadioButton)window.FindName("UiChinese")).IsChecked = true;
-        Require((string)settings.Content == "返回");
-        settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+        Require((string)back.Content == "返回首页");
+        ((TextBlock)window.FindName("InstallPath")).Text = @"自动识别 · D:\Riot Games\League of Legends";
+        Draw(window, 604, 603, Path.Combine(root, "settings-dark-125.png"), 120);
+        var manualPath = (Button)window.FindName("ManualPathButton");
+        var pathButtons = (Grid)manualPath.Parent;
+        var focusCue = new Control { Style = manualPath.FocusVisualStyle, IsHitTestVisible = false };
+        Grid.SetColumn(focusCue, Grid.GetColumn(manualPath));
+        pathButtons.Children.Add(focusCue);
+        Draw(window, 404, 531, Path.Combine(root, "settings-compact-150.png"), 144);
+        pathButtons.Children.Remove(focusCue);
+        back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((TextBlock)window.FindName("StateTitle")).Text = "Riot 正在下载或安装语言资源";
         ((TextBlock)window.FindName("StateDetail")).Text = "保持启动器打开。下载完成后，在 Riot 客户端点「游玩」。";
         var progress = (ProgressBar)window.FindName("Progress");
@@ -135,13 +154,15 @@ internal static class Verify
     {
         if (!condition) throw new InvalidOperationException("A launcher verification failed.");
     }
-    private static void Draw(Window window, int width, int height, string file)
+    private static void Draw(Window window, int width, int height, string file, int dpi = 96)
     {
-        var view = (ScrollViewer)window.Content;
+        var view = (FrameworkElement)window.Content;
         view.Measure(new Size(width, height));
         view.Arrange(new Rect(0, 0, width, height));
         view.UpdateLayout();
-        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        double scale = dpi / 96.0;
+        var bitmap = new RenderTargetBitmap((int)Math.Ceiling(width * scale), (int)Math.Ceiling(height * scale),
+            dpi, dpi, PixelFormats.Pbgra32);
         bitmap.Render(view);
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(bitmap));
