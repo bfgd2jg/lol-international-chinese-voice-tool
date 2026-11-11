@@ -23,14 +23,6 @@ Windows 便携工具，通过 Riot 客户端为《英雄联盟》国际服切换
 
 ![启动器深色设置页](docs/settings-dark.png)
 
-## English quick start
-
-Extract the Windows release and run `LOL国际服改中文语音工具.exe`. Use the gear icon to open **Settings** and choose **English**. Choose **Switch to Chinese** to open Riot and apply Simplified Chinese. Open League’s page, click **Update** if needed, then click **Play**. The tool verifies League’s startup language.
-
-The tool follows Windows on first launch. Click the sun or moon icon to save a light or dark preference, or right-click it to follow Windows again. The arrow returns to the home screen.
-
-If automatic discovery fails, choose `LeagueClient.exe` in **Settings → Game installation → Choose manually**. Use the international League installation managed by Riot. Use **Restore language** to return to the game language saved on first switch.
-
 ## 编译与验证
 
 适用 Windows 10 / 11，使用系统的 .NET Framework 编译器和 WPF。

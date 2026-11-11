@@ -7,20 +7,23 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Markup;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.1.3.0")]
-[assembly: AssemblyFileVersion("1.1.3.0")]
+[assembly: AssemblyVersion("1.1.4.0")]
+[assembly: AssemblyFileVersion("1.1.4.0")]
 
 internal static class Program
 {
     [STAThread]
     public static void Main()
     {
+        ConfigureDpi();
         bool acquired;
         using (var instance = new Mutex(true, @"Local\LeagueChineseLocaleLauncher", out acquired))
         {
@@ -37,6 +40,12 @@ internal static class Program
             app.Run(window);
             instance.ReleaseMutex();
         }
+    }
+
+    internal static void ConfigureDpi()
+    {
+        AppContext.SetSwitch("Switch.System.Windows.DoNotScaleForDpiChanges", false);
+        AppContext.SetSwitch("Switch.System.Windows.DoNotUsePresentationDpiCapabilityTier2OrGreater", false);
     }
 
     internal static Window LoadWindow()
@@ -69,6 +78,8 @@ internal sealed class LauncherWindow
     private readonly string appDirectory;
     private readonly string preferencesPath;
     private readonly LauncherPreferences preferences;
+    private readonly Size minimumWindowSize;
+    private readonly double maximumWindowWidth;
     private bool darkTheme;
     private UiText text;
     private LaunchStatus lastStatus;
@@ -80,6 +91,8 @@ internal sealed class LauncherWindow
     public LauncherWindow(Window view, string appDataDirectory = null)
     {
         window = view;
+        minimumWindowSize = new Size(window.MinWidth, window.MinHeight);
+        maximumWindowWidth = window.MaxWidth;
         appDirectory = appDataDirectory ?? LauncherPreferences.AppDirectory;
         preferencesPath = Path.Combine(appDirectory, "preferences.json");
         preferences = LauncherPreferences.Load(preferencesPath);
@@ -114,11 +127,19 @@ internal sealed class LauncherWindow
         ApplyTheme();
         window.SourceInitialized += (sender, args) => {
             ApplyTheme();
+            FitWindowToScreen();
             SystemEvents.UserPreferenceChanged += OnSystemPreferenceChanged;
+            SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
         };
+        window.Loaded += (sender, args) => FitWindowToScreen();
+        window.LocationChanged += (sender, args) => FitWindowToScreen();
+        window.DpiChanged += OnDisplaySettingsChanged;
         window.Activated += (sender, args) => { if (preferences.Theme == ThemeMode.System) ApplyTheme(); };
         window.Closing += (sender, args) => { if (operation != null) operation.Cancel(); };
-        window.Closed += (sender, args) => { SystemEvents.UserPreferenceChanged -= OnSystemPreferenceChanged; };
+        window.Closed += (sender, args) => {
+            SystemEvents.UserPreferenceChanged -= OnSystemPreferenceChanged;
+            SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
+        };
     }
 
     private void ConfigureSettings()
@@ -127,8 +148,8 @@ internal sealed class LauncherWindow
         var english = (RadioButton)window.FindName("UiEnglish");
         chinese.IsChecked = preferences.UiLanguage == "zh-CN";
         english.IsChecked = preferences.UiLanguage == "en-US";
-        chinese.Checked += (sender, args) => SetUiLanguage("zh-CN");
-        english.Checked += (sender, args) => SetUiLanguage("en-US");
+        chinese.Checked += (sender, args) => { SetUiLanguage("zh-CN"); AnimateEntrance(chinese); };
+        english.Checked += (sender, args) => { SetUiLanguage("en-US"); AnimateEntrance(english); };
     }
 
     private void SetUiLanguage(string language)
@@ -208,13 +229,46 @@ internal sealed class LauncherWindow
         themeButton.IsEnabled = !SystemParameters.HighContrast;
     }
 
-    private void AnimateEntrance(UIElement element)
+    private void AnimateEntrance(FrameworkElement element, double horizontalOffset = 0)
     {
         if (!window.IsLoaded || !SystemParameters.ClientAreaAnimation) return;
-        element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0.6, 1, TimeSpan.FromMilliseconds(160)) {
+        element.BeginAnimation(UIElement.OpacityProperty, EntranceAnimation(0.6, 1));
+        if (horizontalOffset != 0)
+        {
+            var translation = new TranslateTransform();
+            element.RenderTransform = translation;
+            translation.BeginAnimation(TranslateTransform.XProperty, EntranceAnimation(horizontalOffset, 0));
+        }
+    }
+
+    private static DoubleAnimation EntranceAnimation(double from, double to)
+    {
+        return new DoubleAnimation(from, to, TimeSpan.FromMilliseconds(200)) {
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
             FillBehavior = FillBehavior.Stop
-        });
+        };
+    }
+
+    private void FitWindowToScreen()
+    {
+        var source = PresentationSource.FromVisual(window) as HwndSource;
+        if (source == null || source.CompositionTarget == null) return;
+        var area = System.Windows.Forms.Screen.FromHandle(source.Handle).WorkingArea;
+        var logicalSize = source.CompositionTarget.TransformFromDevice.Transform(new Vector(area.Width, area.Height));
+        double width = Math.Floor(logicalSize.X);
+        double height = Math.Floor(logicalSize.Y);
+        if (width <= 0 || height <= 0) return;
+
+        window.MinWidth = Math.Min(minimumWindowSize.Width, width);
+        window.MinHeight = Math.Min(minimumWindowSize.Height, height);
+        window.MaxWidth = Math.Min(maximumWindowWidth, width);
+        window.MaxHeight = height;
+    }
+
+    private void OnDisplaySettingsChanged(object sender, EventArgs args)
+    {
+        if (window.Dispatcher.HasShutdownStarted) return;
+        window.Dispatcher.BeginInvoke(new Action(FitWindowToScreen));
     }
 
     private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs args)
@@ -230,7 +284,7 @@ internal sealed class LauncherWindow
         settingsButton.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
         backButton.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         pageScroll.ScrollToTop();
-        AnimateEntrance(show ? settingsPanel : homePanel);
+        AnimateEntrance(show ? settingsPanel : homePanel, show ? 12 : -12);
         (show ? backButton : settingsButton).Focus();
     }
 

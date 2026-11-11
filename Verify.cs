@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
 using System.Windows.Automation;
@@ -14,6 +15,7 @@ internal static class Verify
     [STAThread]
     public static void Main(string[] args)
     {
+        Program.ConfigureDpi();
         string root = args[0];
         Directory.CreateDirectory(root);
         string file = Path.Combine(root, "Riot fixture.yaml");
@@ -88,8 +90,13 @@ internal static class Verify
         defaults.Save(preferenceFile);
         var app = new Application();
         Window window = Program.LoadWindow();
+        Require(window.Width == 420 && window.Width == window.MinWidth
+            && window.Height == 470 && window.Height == window.MinHeight);
         new LauncherWindow(window, appData).Initialize(install);
-        new System.Windows.Interop.WindowInteropHelper(window).EnsureHandle();
+        var handle = new System.Windows.Interop.WindowInteropHelper(window).EnsureHandle();
+        IntPtr dpiAwareness = GetWindowDpiAwarenessContext(handle);
+        Require(AreDpiAwarenessContextsEqual(dpiAwareness, new IntPtr(-4))
+            || AreDpiAwarenessContextsEqual(dpiAwareness, new IntPtr(-3)));
         var settings = (Button)window.FindName("SettingsButton");
         var back = (Button)window.FindName("BackButton");
         var theme = (Button)window.FindName("ThemeButton");
@@ -99,7 +106,7 @@ internal static class Verify
         Require(((FrameworkElement)window.FindName("SettingsPanel")).Visibility == Visibility.Visible
             && back.Visibility == Visibility.Visible && settings.Visibility == Visibility.Collapsed);
         Require(AutomationProperties.GetName(theme) == "切换为深色模式");
-        Draw(window, 604, 663, Path.Combine(root, "settings-light.png"));
+        Draw(window, 404, 431, Path.Combine(root, "settings-light.png"));
         theme.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((RadioButton)window.FindName("UiEnglish")).IsChecked = true;
         Require(AutomationProperties.GetName(back) == "Back to home"
@@ -109,8 +116,8 @@ internal static class Verify
         LauncherPreferences saved = LauncherPreferences.Load(preferenceFile);
         Require(saved.Theme == ThemeMode.Dark && saved.UiLanguage == "en-US");
         ((TextBlock)window.FindName("InstallPath")).Text = @"Auto-detect · D:\Riot Games\League of Legends";
-        Draw(window, 604, 440, Path.Combine(root, "settings-dark.png"));
-        Draw(window, 404, 285, Path.Combine(root, "settings-compact.png"));
+        Draw(window, 404, 431, Path.Combine(root, "settings-dark.png"));
+        Draw(window, 340, 285, Path.Combine(root, "settings-compact.png"), 144);
         var view = (FrameworkElement)window.Content;
         Point backPosition = back.TranslatePoint(new Point(), view);
         scroll.ScrollToEnd();
@@ -120,18 +127,19 @@ internal static class Verify
         Require(((FrameworkElement)window.FindName("HomePanel")).Visibility == Visibility.Visible
             && back.Visibility == Visibility.Collapsed && settings.Visibility == Visibility.Visible);
         Require(AutomationProperties.GetName(settings) == "Settings");
-        Draw(window, 604, 531, Path.Combine(root, "home-dark.png"));
+        Draw(window, 404, 431, Path.Combine(root, "home-dark.png"), 144);
+        Require(scroll.ScrollableHeight == 0);
         settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((RadioButton)window.FindName("UiChinese")).IsChecked = true;
         Require(AutomationProperties.GetName(back) == "返回首页");
         ((TextBlock)window.FindName("InstallPath")).Text = @"自动识别 · D:\Riot Games\League of Legends";
-        Draw(window, 604, 603, Path.Combine(root, "settings-dark-125.png"), 120);
+        Draw(window, 404, 431, Path.Combine(root, "settings-dark-125.png"), 120);
         var manualPath = (Button)window.FindName("ManualPathButton");
         var pathButtons = (Grid)manualPath.Parent;
         var focusCue = new Control { Style = manualPath.FocusVisualStyle, IsHitTestVisible = false };
         Grid.SetColumn(focusCue, Grid.GetColumn(manualPath));
         pathButtons.Children.Add(focusCue);
-        Draw(window, 404, 531, Path.Combine(root, "settings-compact-150.png"), 144);
+        Draw(window, 404, 431, Path.Combine(root, "settings-compact-150.png"), 144);
         pathButtons.Children.Remove(focusCue);
         back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((TextBlock)window.FindName("StateTitle")).Text = "Riot 正在下载或安装语言资源";
@@ -143,7 +151,11 @@ internal static class Verify
         percent.Text = "63%";
         percent.Visibility = Visibility.Visible;
         ((Button)window.FindName("StartButton")).Content = "停止等待";
-        Draw(window, 404, 431, Path.Combine(root, "progress-compact.png"));
+        Draw(window, 404, 431, Path.Combine(root, "progress-compact.png"), 192);
+        Draw(window, 344, 300, Path.Combine(root, "progress-small-screen.png"), 192);
+        scroll.ScrollToEnd();
+        Draw(window, 344, 300, Path.Combine(root, "progress-small-screen-scrolled.png"), 192);
+        Require(scroll.VerticalOffset > 0);
         saved.GamePath = game;
         saved.Save(preferenceFile);
         Window reopened = Program.LoadWindow();
@@ -164,10 +176,11 @@ internal static class Verify
     private static void Draw(Window window, int width, int height, string file, int dpi = 96)
     {
         var view = (FrameworkElement)window.Content;
+        double scale = dpi / 96.0;
+        VisualTreeHelper.SetRootDpi(window, new DpiScale(scale, scale));
         view.Measure(new Size(width, height));
         view.Arrange(new Rect(0, 0, width, height));
         view.UpdateLayout();
-        double scale = dpi / 96.0;
         var bitmap = new RenderTargetBitmap((int)Math.Ceiling(width * scale), (int)Math.Ceiling(height * scale),
             dpi, dpi, PixelFormats.Pbgra32);
         bitmap.Render(view);
@@ -175,4 +188,10 @@ internal static class Verify
         encoder.Frames.Add(BitmapFrame.Create(bitmap));
         using (var stream = File.Create(file)) encoder.Save(stream);
     }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetWindowDpiAwarenessContext(IntPtr window);
+
+    [DllImport("user32.dll")]
+    private static extern bool AreDpiAwarenessContextsEqual(IntPtr left, IntPtr right);
 }

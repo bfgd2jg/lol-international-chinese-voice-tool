@@ -10,10 +10,12 @@ if (!(Test-Path -LiteralPath $compiler)) { throw 'The .NET Framework C# compiler
 
 $output = New-Item -ItemType Directory -Force -Path (Join-Path $PSScriptRoot 'artifacts')
 $references = @('WPF\PresentationFramework.dll', 'WPF\PresentationCore.dll', 'WPF\WindowsBase.dll',
-    'System.Xaml.dll', 'System.Web.Extensions.dll') | ForEach-Object { '/reference:' + (Join-Path $framework $_) }
+    'System.Xaml.dll', 'System.Web.Extensions.dll', 'System.Windows.Forms.dll', 'System.Drawing.dll') |
+    ForEach-Object { '/reference:' + (Join-Path $framework $_) }
 $sources = @('Program.cs', 'LauncherPreferences.cs', 'UiText.cs', 'WindowTheme.cs', 'LocaleFile.cs', 'LeagueLauncher.cs') |
     ForEach-Object { Join-Path $PSScriptRoot $_ }
 $options = @('/nologo', '/optimize+', '/codepage:65001',
+    ('/win32manifest:' + (Join-Path $PSScriptRoot 'app.manifest')),
     ('/resource:' + (Join-Path $PSScriptRoot 'Main.xaml') + ',Launcher.Main.xaml'),
     ('/resource:' + (Join-Path $PSScriptRoot 'UiText.tsv') + ',Launcher.UiText.tsv')) + $references
 $launcher = Join-Path $output.FullName 'LOL国际服改中文语音工具.exe'
