@@ -2,7 +2,7 @@
 
 Windows 便携工具，通过 Riot 客户端为《英雄联盟》国际服切换大陆简体中文文字和英雄语音。切换流程已在台服（TW2）验证。
 
-[下载 Windows 版](https://github.com/bfgd2jg/lol-chinese-launcher/releases/latest)
+[下载 Windows 版](https://github.com/bfgd2jg/lol-international-chinese-voice-tool/releases/latest)
 
 ## 使用
 
