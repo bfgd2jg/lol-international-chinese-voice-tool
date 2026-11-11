@@ -23,7 +23,7 @@ internal static class WindowTheme
         "#8AB0FF", "#101D36", "#283D60", "#DCE8FF", "#9BBCFF", "#34455C", "#96AAC3"
     };
 
-    public static void Apply(Window window, ThemeMode mode)
+    public static bool Apply(Window window, ThemeMode mode)
     {
         bool highContrast = SystemParameters.HighContrast;
         bool dark = !highContrast && (mode == ThemeMode.Dark || (mode == ThemeMode.System && SystemDark()));
@@ -50,6 +50,7 @@ internal static class WindowTheme
             int useDark = dark ? 1 : 0;
             DwmSetWindowAttribute(handle, 20, ref useDark, sizeof(int));
         }
+        return dark;
     }
 
     private static bool SystemDark()

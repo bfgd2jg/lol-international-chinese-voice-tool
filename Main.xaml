@@ -5,6 +5,10 @@
         Background="{DynamicResource Canvas}" FontFamily="Segoe UI, Microsoft YaHei UI" FontSize="14"
         UseLayoutRounding="True" SnapsToDevicePixels="True" TextOptions.TextFormattingMode="Display">
   <Window.Resources>
+    <Geometry x:Key="GearIcon">M 10,2.5 L 14,2.5 14.7,5.2 16.4,6.2 19.1,5.5 21.1,9 19.2,11 19.2,13 21.1,15 19.1,18.5 16.4,17.8 14.7,18.8 14,21.5 10,21.5 9.3,18.8 7.6,17.8 4.9,18.5 2.9,15 4.8,13 4.8,11 2.9,9 4.9,5.5 7.6,6.2 9.3,5.2 Z M 15,12 A 3,3 0 1 0 9,12 A 3,3 0 1 0 15,12 Z</Geometry>
+    <Geometry x:Key="BackIcon">M 20,12 L 4,12 M 11,5 L 4,12 11,19</Geometry>
+    <Geometry x:Key="MoonIcon">M 20.6,15.4 A 9,9 0 0 1 8.6,3.4 A 9,9 0 1 0 20.6,15.4 Z</Geometry>
+    <Geometry x:Key="SunIcon">M 16,12 A 4,4 0 1 0 8,12 A 4,4 0 1 0 16,12 Z M 12,2 L 12,4 M 12,20 L 12,22 M 2,12 L 4,12 M 20,12 L 22,12 M 5,5 L 6.5,6.5 M 17.5,17.5 L 19,19 M 19,5 L 17.5,6.5 M 6.5,17.5 L 5,19</Geometry>
     <Style TargetType="TextBlock">
       <Setter Property="Foreground" Value="{DynamicResource Ink}"/>
       <Setter Property="TextWrapping" Value="Wrap"/>
@@ -58,6 +62,21 @@
       <Setter Property="Foreground" Value="{DynamicResource Ink}"/>
       <Setter Property="Background" Value="{DynamicResource Panel}"/>
       <Setter Property="BorderBrush" Value="{DynamicResource Border}"/>
+    </Style>
+    <Style x:Key="ToolbarButton" TargetType="Button" BasedOn="{StaticResource SecondaryButton}">
+      <Setter Property="Width" Value="46"/>
+      <Setter Property="Padding" Value="10"/>
+    </Style>
+    <Style x:Key="ToolbarGlyph" TargetType="Path">
+      <Setter Property="Width" Value="20"/>
+      <Setter Property="Height" Value="20"/>
+      <Setter Property="Stretch" Value="Uniform"/>
+      <Setter Property="Stroke" Value="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"/>
+      <Setter Property="StrokeThickness" Value="1.6"/>
+      <Setter Property="StrokeLineJoin" Value="Round"/>
+      <Setter Property="StrokeStartLineCap" Value="Round"/>
+      <Setter Property="StrokeEndLineCap" Value="Round"/>
+      <Setter Property="IsHitTestVisible" Value="False"/>
     </Style>
     <Style x:Key="Choice" TargetType="RadioButton">
       <Setter Property="MinHeight" Value="44"/>
@@ -129,10 +148,27 @@
       <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
       <TextBlock Text="{DynamicResource Brand}" FontSize="15" FontWeight="SemiBold"
                  VerticalAlignment="Center" Margin="0,0,12,0"/>
-      <Grid Grid.Column="1">
-        <Button x:Name="SettingsButton" Content="{DynamicResource Settings}" Style="{StaticResource SecondaryButton}" MinWidth="68"/>
-        <Button x:Name="BackButton" Content="{DynamicResource Back}" Style="{StaticResource SecondaryButton}" Visibility="Collapsed"/>
-      </Grid>
+      <StackPanel Grid.Column="1" Orientation="Horizontal">
+        <Button x:Name="ThemeButton" Style="{StaticResource ToolbarButton}" Margin="0,0,8,0">
+          <Button.ContextMenu>
+            <ContextMenu Background="{DynamicResource Panel}" Foreground="{DynamicResource Ink}"
+                         BorderBrush="{DynamicResource Border}">
+              <MenuItem x:Name="SystemThemeItem" Header="{DynamicResource ThemeSystem}"/>
+            </ContextMenu>
+          </Button.ContextMenu>
+          <Path x:Name="ThemeGlyph" Style="{StaticResource ToolbarGlyph}"/>
+        </Button>
+        <Grid>
+          <Button x:Name="SettingsButton" Style="{StaticResource ToolbarButton}"
+                  ToolTip="{DynamicResource Settings}" AutomationProperties.Name="{DynamicResource Settings}">
+            <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource GearIcon}"/>
+          </Button>
+          <Button x:Name="BackButton" Style="{StaticResource ToolbarButton}" Visibility="Collapsed"
+                  ToolTip="{DynamicResource Back}" AutomationProperties.Name="{DynamicResource Back}">
+            <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource BackIcon}"/>
+          </Button>
+        </Grid>
+      </StackPanel>
     </Grid>
   <ScrollViewer Grid.Row="1" x:Name="PageScroll" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                 Background="{DynamicResource Canvas}">
@@ -203,16 +239,6 @@
         <TextBlock Text="{DynamicResource Settings}" FontSize="25" FontWeight="SemiBold" Margin="0,1,0,12"/>
         <Border Style="{StaticResource Card}" Padding="16,10">
           <StackPanel>
-            <TextBlock Text="{DynamicResource Theme}" FontWeight="SemiBold"/>
-            <UniformGrid Columns="3" Margin="0,8,0,0">
-              <RadioButton x:Name="ThemeSystem" GroupName="Theme" Content="{DynamicResource ThemeSystem}" Tag="System" Style="{StaticResource Choice}"/>
-              <RadioButton x:Name="ThemeLight" GroupName="Theme" Content="{DynamicResource ThemeLight}" Tag="Light" Style="{StaticResource Choice}" Margin="8,0,0,0"/>
-              <RadioButton x:Name="ThemeDark" GroupName="Theme" Content="{DynamicResource ThemeDark}" Tag="Dark" Style="{StaticResource Choice}" Margin="8,0,0,0"/>
-            </UniformGrid>
-          </StackPanel>
-        </Border>
-        <Border Style="{StaticResource Card}" Padding="16,10" Margin="0,10,0,0">
-          <StackPanel>
             <TextBlock Text="{DynamicResource UiLanguage}" FontWeight="SemiBold"/>
             <UniformGrid Columns="2" Margin="0,8,0,0">
               <RadioButton x:Name="UiChinese" GroupName="UiLanguage" Content="简体中文" Style="{StaticResource Choice}"/>
@@ -229,15 +255,6 @@
               <Button x:Name="AutoPathButton" Content="{DynamicResource AutoDetect}" Style="{StaticResource SecondaryButton}"/>
               <Button x:Name="ManualPathButton" Grid.Column="2" Content="{DynamicResource ChoosePath}" Style="{StaticResource SecondaryButton}"/>
             </Grid>
-          </StackPanel>
-        </Border>
-        <Border Style="{StaticResource Card}" Padding="16,10" Margin="0,10,0,0">
-          <StackPanel>
-            <TextBlock Text="{DynamicResource LaunchMode}" FontWeight="SemiBold"/>
-            <UniformGrid Columns="2" Margin="0,8,0,0">
-              <RadioButton x:Name="LaunchAuto" GroupName="Launch" Content="{DynamicResource AutoLaunch}" Style="{StaticResource Choice}"/>
-              <RadioButton x:Name="LaunchManual" GroupName="Launch" Content="{DynamicResource ManualLaunch}" Style="{StaticResource Choice}" Margin="8,0,0,0"/>
-            </UniformGrid>
           </StackPanel>
         </Border>
         <TextBlock x:Name="SettingsFeedback" Text="{DynamicResource PrefsHint}"

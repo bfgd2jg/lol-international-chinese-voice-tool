@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -73,39 +74,43 @@ internal static class Verify
         string appData = Path.Combine(root, "preferences");
         Directory.CreateDirectory(appData);
         string preferenceFile = Path.Combine(appData, "preferences.json");
-        File.WriteAllText(preferenceFile, "{\"Theme\":2,\"UiLanguage\":\"en-US\",\"OpenGameAutomatically\":false,\"WaitMinutes\":45}");
+        File.WriteAllText(preferenceFile, "{\"Theme\":2,\"UiLanguage\":\"en-US\",\"OpenGameAutomatically\":true,\"WaitMinutes\":45}");
         var legacy = LauncherPreferences.Load(preferenceFile);
-        Require(legacy.Theme == ThemeMode.Dark && legacy.UiLanguage == "en-US" && !legacy.OpenGameAutomatically);
+        Require(legacy.Theme == ThemeMode.Dark && legacy.UiLanguage == "en-US");
         legacy.Save(preferenceFile);
-        Require(!File.ReadAllText(preferenceFile).Contains("WaitMinutes"));
+        string migrated = File.ReadAllText(preferenceFile);
+        Require(!migrated.Contains("WaitMinutes") && !migrated.Contains("OpenGameAutomatically"));
         File.WriteAllText(preferenceFile, "broken json");
         LauncherPreferences defaults = LauncherPreferences.Load(preferenceFile);
-        Require(defaults.Theme == ThemeMode.System && defaults.OpenGameAutomatically
+        Require(defaults.Theme == ThemeMode.System
             && defaults.UiLanguage == "zh-CN" && defaults.GamePath == null);
+        defaults.Theme = ThemeMode.Light;
+        defaults.Save(preferenceFile);
         var app = new Application();
         Window window = Program.LoadWindow();
         new LauncherWindow(window, appData).Initialize(install);
         new System.Windows.Interop.WindowInteropHelper(window).EnsureHandle();
         var settings = (Button)window.FindName("SettingsButton");
         var back = (Button)window.FindName("BackButton");
+        var theme = (Button)window.FindName("ThemeButton");
         var scroll = (ScrollViewer)window.FindName("PageScroll");
         Require(back.Visibility == Visibility.Collapsed);
         settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Require(((FrameworkElement)window.FindName("SettingsPanel")).Visibility == Visibility.Visible
             && back.Visibility == Visibility.Visible && settings.Visibility == Visibility.Collapsed);
-        ((RadioButton)window.FindName("ThemeLight")).IsChecked = true;
+        Require(AutomationProperties.GetName(theme) == "切换为深色模式");
         Draw(window, 604, 663, Path.Combine(root, "settings-light.png"));
-        ((RadioButton)window.FindName("ThemeDark")).IsChecked = true;
-        ((RadioButton)window.FindName("LaunchManual")).IsChecked = true;
+        theme.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((RadioButton)window.FindName("UiEnglish")).IsChecked = true;
-        Require((string)back.Content == "Back to home");
+        Require(AutomationProperties.GetName(back) == "Back to home"
+            && AutomationProperties.GetName(theme) == "Switch to light theme");
         Require(((TextBlock)window.FindName("InstallPath")).Text.StartsWith("Auto-detect"));
         Require(((TextBlock)window.FindName("StateTitle")).Text == "Current setting: Chinese (Taiwan)");
         LauncherPreferences saved = LauncherPreferences.Load(preferenceFile);
-        Require(saved.Theme == ThemeMode.Dark && !saved.OpenGameAutomatically && saved.UiLanguage == "en-US");
+        Require(saved.Theme == ThemeMode.Dark && saved.UiLanguage == "en-US");
         ((TextBlock)window.FindName("InstallPath")).Text = @"Auto-detect · D:\Riot Games\League of Legends";
-        Draw(window, 604, 603, Path.Combine(root, "settings-dark.png"));
-        Draw(window, 404, 431, Path.Combine(root, "settings-compact.png"));
+        Draw(window, 604, 440, Path.Combine(root, "settings-dark.png"));
+        Draw(window, 404, 285, Path.Combine(root, "settings-compact.png"));
         var view = (FrameworkElement)window.Content;
         Point backPosition = back.TranslatePoint(new Point(), view);
         scroll.ScrollToEnd();
@@ -114,11 +119,11 @@ internal static class Verify
         back.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         Require(((FrameworkElement)window.FindName("HomePanel")).Visibility == Visibility.Visible
             && back.Visibility == Visibility.Collapsed && settings.Visibility == Visibility.Visible);
-        Require((string)settings.Content == "Settings");
+        Require(AutomationProperties.GetName(settings) == "Settings");
         Draw(window, 604, 531, Path.Combine(root, "home-dark.png"));
         settings.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         ((RadioButton)window.FindName("UiChinese")).IsChecked = true;
-        Require((string)back.Content == "返回首页");
+        Require(AutomationProperties.GetName(back) == "返回首页");
         ((TextBlock)window.FindName("InstallPath")).Text = @"自动识别 · D:\Riot Games\League of Legends";
         Draw(window, 604, 603, Path.Combine(root, "settings-dark-125.png"), 120);
         var manualPath = (Button)window.FindName("ManualPathButton");
@@ -143,10 +148,12 @@ internal static class Verify
         saved.Save(preferenceFile);
         Window reopened = Program.LoadWindow();
         new LauncherWindow(reopened, appData).Initialize(install);
-        Require(((RadioButton)reopened.FindName("ThemeDark")).IsChecked == true);
-        Require(((RadioButton)reopened.FindName("LaunchManual")).IsChecked == true);
+        Require(AutomationProperties.GetName((Button)reopened.FindName("ThemeButton")) == "Switch to light theme");
         Require(((RadioButton)reopened.FindName("UiEnglish")).IsChecked == true);
         Require(((TextBlock)reopened.FindName("InstallPath")).Text == "Manual · " + game);
+        var systemThemeItem = (MenuItem)window.FindName("SystemThemeItem");
+        systemThemeItem.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
+        Require(LauncherPreferences.Load(preferenceFile).Theme == ThemeMode.System);
         window.Close();
         Console.WriteLine("WPF pages rendered, and settings persist on reopening.");
     }

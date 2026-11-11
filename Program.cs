@@ -8,12 +8,13 @@ using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Markup;
+using System.Windows.Media.Animation;
 using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.1.2.0")]
-[assembly: AssemblyFileVersion("1.1.2.0")]
+[assembly: AssemblyVersion("1.1.3.0")]
+[assembly: AssemblyFileVersion("1.1.3.0")]
 
 internal static class Program
 {
@@ -56,6 +57,8 @@ internal sealed class LauncherWindow
     private readonly TextBlock progressText;
     private readonly Button settingsButton;
     private readonly Button backButton;
+    private readonly Button themeButton;
+    private readonly System.Windows.Shapes.Path themeGlyph;
     private readonly FrameworkElement homePanel;
     private readonly FrameworkElement settingsPanel;
     private readonly ScrollViewer pageScroll;
@@ -66,6 +69,7 @@ internal sealed class LauncherWindow
     private readonly string appDirectory;
     private readonly string preferencesPath;
     private readonly LauncherPreferences preferences;
+    private bool darkTheme;
     private UiText text;
     private LaunchStatus lastStatus;
     private UiMessage installProblem;
@@ -87,6 +91,8 @@ internal sealed class LauncherWindow
         progressText = (TextBlock)view.FindName("ProgressText");
         settingsButton = (Button)view.FindName("SettingsButton");
         backButton = (Button)view.FindName("BackButton");
+        themeButton = (Button)view.FindName("ThemeButton");
+        themeGlyph = (System.Windows.Shapes.Path)view.FindName("ThemeGlyph");
         homePanel = (FrameworkElement)view.FindName("HomePanel");
         settingsPanel = (FrameworkElement)view.FindName("SettingsPanel");
         pageScroll = (ScrollViewer)view.FindName("PageScroll");
@@ -98,6 +104,9 @@ internal sealed class LauncherWindow
         restore.Click += OnRestore;
         settingsButton.Click += (sender, args) => ShowSettings(true);
         backButton.Click += (sender, args) => ShowSettings(false);
+        themeButton.Click += (sender, args) => SetTheme(darkTheme ? ThemeMode.Light : ThemeMode.Dark);
+        var systemThemeItem = (MenuItem)view.FindName("SystemThemeItem");
+        systemThemeItem.Click += (sender, args) => SetTheme(ThemeMode.System);
         autoPathButton.Click += (sender, args) => SelectGamePath(null);
         manualPathButton.Click += ChooseGamePath;
         ConfigureSettings();
@@ -120,23 +129,6 @@ internal sealed class LauncherWindow
         english.IsChecked = preferences.UiLanguage == "en-US";
         chinese.Checked += (sender, args) => SetUiLanguage("zh-CN");
         english.Checked += (sender, args) => SetUiLanguage("en-US");
-        foreach (string name in new[] { "ThemeSystem", "ThemeLight", "ThemeDark" })
-        {
-            var choice = (RadioButton)window.FindName(name);
-            var mode = (ThemeMode)Enum.Parse(typeof(ThemeMode), (string)choice.Tag);
-            choice.IsChecked = preferences.Theme == mode;
-            choice.Checked += (sender, args) => {
-                preferences.Theme = mode;
-                ApplyTheme();
-                SavePreferences();
-            };
-        }
-        var automatic = (RadioButton)window.FindName("LaunchAuto");
-        var manual = (RadioButton)window.FindName("LaunchManual");
-        automatic.IsChecked = preferences.OpenGameAutomatically;
-        manual.IsChecked = !preferences.OpenGameAutomatically;
-        automatic.Checked += (sender, args) => SetAutoOpen(true);
-        manual.Checked += (sender, args) => SetAutoOpen(false);
     }
 
     private void SetUiLanguage(string language)
@@ -188,12 +180,6 @@ internal sealed class LauncherWindow
         manualPathButton.SetResourceReference(ContentControl.ContentProperty, manual ? "ChangePath" : "ChoosePath");
     }
 
-    private void SetAutoOpen(bool enabled)
-    {
-        preferences.OpenGameAutomatically = enabled;
-        SavePreferences();
-    }
-
     private void SavePreferences()
     {
         try
@@ -205,7 +191,31 @@ internal sealed class LauncherWindow
         catch (UnauthorizedAccessException) { settingsFeedback.SetResourceReference(TextBlock.TextProperty, "PrefsFailure"); }
     }
 
-    private void ApplyTheme() { WindowTheme.Apply(window, preferences.Theme); }
+    private void SetTheme(ThemeMode theme)
+    {
+        preferences.Theme = theme;
+        ApplyTheme();
+        SavePreferences();
+        AnimateEntrance(themeGlyph);
+    }
+
+    private void ApplyTheme()
+    {
+        darkTheme = WindowTheme.Apply(window, preferences.Theme);
+        themeGlyph.SetResourceReference(System.Windows.Shapes.Path.DataProperty, darkTheme ? "SunIcon" : "MoonIcon");
+        themeButton.SetResourceReference(AutomationProperties.NameProperty, darkTheme ? "ThemeLight" : "ThemeDark");
+        themeButton.SetResourceReference(FrameworkElement.ToolTipProperty, darkTheme ? "ThemeLightHint" : "ThemeDarkHint");
+        themeButton.IsEnabled = !SystemParameters.HighContrast;
+    }
+
+    private void AnimateEntrance(UIElement element)
+    {
+        if (!window.IsLoaded || !SystemParameters.ClientAreaAnimation) return;
+        element.BeginAnimation(UIElement.OpacityProperty, new DoubleAnimation(0.6, 1, TimeSpan.FromMilliseconds(160)) {
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+            FillBehavior = FillBehavior.Stop
+        });
+    }
 
     private void OnSystemPreferenceChanged(object sender, UserPreferenceChangedEventArgs args)
     {
@@ -220,6 +230,7 @@ internal sealed class LauncherWindow
         settingsButton.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
         backButton.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
         pageScroll.ScrollToTop();
+        AnimateEntrance(show ? settingsPanel : homePanel);
         (show ? backButton : settingsButton).Focus();
     }
 
@@ -302,12 +313,11 @@ internal sealed class LauncherWindow
         });
         Buttons();
         Show(new LaunchStatus(restoring ? "Restoring" : "Preparing", "CheckingProcesses"));
-        bool autoOpen = preferences.OpenGameAutomatically;
         try
         {
             LaunchStatus result = await Task.Run(() => restoring
-                ? engine.Restore(autoOpen, progress, cancel.Token)
-                : engine.SwitchAndLaunch(autoOpen, progress, cancel.Token), cancel.Token);
+                ? engine.Restore(progress, cancel.Token)
+                : engine.SwitchToChinese(progress, cancel.Token), cancel.Token);
             Show(result);
         }
         catch (OperationCanceledException)

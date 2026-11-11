@@ -10,13 +10,11 @@ internal sealed class LauncherPreferences
     public ThemeMode Theme { get; set; }
     public string UiLanguage { get; set; }
     public string GamePath { get; set; }
-    public bool OpenGameAutomatically { get; set; }
 
     public LauncherPreferences()
     {
         Theme = ThemeMode.System;
         UiLanguage = "zh-CN";
-        OpenGameAutomatically = true;
     }
 
     public static string AppDirectory { get { return Path.Combine(

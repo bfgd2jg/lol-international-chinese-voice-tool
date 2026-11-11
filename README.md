@@ -7,26 +7,27 @@ Windows 便携工具，通过 Riot 客户端为《英雄联盟》国际服切换
 ## 使用
 
 1. 确认电脑已通过 Riot 客户端安装国际服，并退出英雄联盟大厅或对局。
-2. 解压发行版 ZIP，双击 `LOL国际服改中文语音工具.exe`，点 **切换简中并启动**。
-3. 首次由 Riot 下载语言资源。如果 Riot 显示 **更新** 或 **游玩**，按提示点击。启动器会显示资源进度，并核对客户端启动语言。
+2. 解压发行版 ZIP，双击 `LOL国际服改中文语音工具.exe`，点 **切换为简中**。
+3. Riot 打开后，进入英雄联盟页面。首次按提示点 **更新** 下载语言资源，然后手动点 **游玩**。工具会显示资源进度，并核对客户端启动语言。
 
-如果 Riot 仍用原语言启动，请退出英雄联盟大厅和托盘里的 Riot 客户端，再用工具重试。要切回去时，退出英雄联盟大厅后点 **恢复原语言**。工具会保存首次从其他语言切换时的原语言。
+如果 Riot 仍用原语言启动，请退出英雄联盟大厅和托盘里的 Riot 客户端，再用工具重试。工具会保存首次切换前的语言。要切回去时，退出英雄联盟大厅，点 **恢复原语言**，再到 Riot 手动点 **游玩**。
 
 ## 设置
 
-- 界面可选跟随 Windows、浅色或深色。
+- 首次打开跟随 Windows 的深浅色设置。点顶部的日月图标手动切换并保存偏好，右键可恢复跟随系统。
 - 启动器界面可选简体中文或 English。游戏语言的切换目标为大陆简体中文。
 - 游戏路径默认自动识别。若识别失败，点 **手动选择**，选择 Riot 国际服安装目录里的 `LeagueClient.exe`。
-- 默认自动请求打开英雄联盟，也可在 Riot 客户端手动点游玩。
 - 自动等待语言资源，确认客户端使用目标语言后完成。可随时点 **停止等待**，或退出工具。
 
-设置会保存在当前 Windows 用户目录。启动选项在下一次切换时生效。点设置页顶部的 **返回首页** 可回到启动界面。
+设置会保存在当前 Windows 用户目录。点顶部齿轮打开设置，点返回箭头回到首页。
 
 ![启动器深色设置页](docs/settings-dark.png)
 
 ## English quick start
 
-Extract the Windows release and run `LOL国际服改中文语音工具.exe`. Open **Settings** and choose **English** to change the launcher interface. Choose **Launch in Chinese** to switch League’s text and champion voices to Simplified Chinese. Riot downloads the files on first use. The tool waits automatically and finishes when it verifies League’s language. Click **Update** or **Play** in Riot if prompted.
+Extract the Windows release and run `LOL国际服改中文语音工具.exe`. Use the gear icon to open **Settings** and choose **English**. Choose **Switch to Chinese** to open Riot and apply Simplified Chinese. Open League’s page, click **Update** if needed, then click **Play**. The tool verifies League’s startup language.
+
+The tool follows Windows on first launch. Click the sun or moon icon to save a light or dark preference, or right-click it to follow Windows again. The arrow returns to the home screen.
 
 If automatic discovery fails, choose `LeagueClient.exe` in **Settings → Game installation → Choose manually**. Use the international League installation managed by Riot. Use **Restore language** to return to the game language saved on first switch.
 

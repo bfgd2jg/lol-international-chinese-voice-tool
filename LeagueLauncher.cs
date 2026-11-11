@@ -187,11 +187,10 @@ internal sealed class LeagueLauncher
             && File.Exists(Path.Combine(install.GameRoot, "Game", "DATA", "FINAL", "Localized", "Global.zh_CN.wad.client"))
             && File.Exists(Path.Combine(install.GameRoot, "Game", "DATA", "FINAL", "Champions", "Aatrox.zh_CN.wad.client"));
     }
-    private void LaunchRiot(bool game)
+    private void OpenRiot()
     {
         var info = new ProcessStartInfo(install.RiotExe) {
-            UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(install.RiotExe),
-            Arguments = game ? "--launch-product=league_of_legends --launch-patchline=live" : ""
+            UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(install.RiotExe)
         };
         using (Process launcher = Process.Start(info)) { }
     }
@@ -222,19 +221,19 @@ internal sealed class LeagueLauncher
         return new LaunchStatus(title, detail, files ? 100 : (double?)null);
     }
 
-    public Task<LaunchStatus> SwitchAndLaunch(bool autoOpen, IProgress<LaunchStatus> progress, CancellationToken cancel)
+    public Task<LaunchStatus> SwitchToChinese(IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
-        return UseLanguage(Chinese, autoOpen, progress, cancel);
+        return UseLanguage(Chinese, progress, cancel);
     }
 
-    public async Task<LaunchStatus> Restore(bool autoOpen, IProgress<LaunchStatus> progress, CancellationToken cancel)
+    public async Task<LaunchStatus> Restore(IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
         string original = OriginalLocale;
         if (original == null) return new LaunchStatus("NoBackup", "RestoreUnavailable");
-        return await UseLanguage(original, autoOpen, progress, cancel).ConfigureAwait(false);
+        return await UseLanguage(original, progress, cancel).ConfigureAwait(false);
     }
 
-    private async Task<LaunchStatus> UseLanguage(string target, bool autoOpen,
+    private async Task<LaunchStatus> UseLanguage(string target,
         IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
         if (GameRunning()) return new LaunchStatus("InGame", "InGameHint");
@@ -252,13 +251,10 @@ internal sealed class LeagueLauncher
         await SetLocale(target, cancel).ConfigureAwait(false);
         DateTime started = DateTime.UtcNow;
         DateTime nextStatus = started;
-        bool riotStarted = false;
         bool sawDownload = false;
         DateTime? riotMissingSince = null;
-        LaunchRiot(false);
-        progress.Report(new LaunchStatus("RiotStarting", autoOpen
-            ? "RiotStartingAuto"
-            : "RiotStartingManual"));
+        OpenRiot();
+        progress.Report(new LaunchStatus("RiotStarting", "RiotStartingManual"));
 
         while (true)
         {
@@ -273,14 +269,10 @@ internal sealed class LeagueLauncher
             }
             locale.TryWrite(target);
             DateTime now = DateTime.UtcNow;
-            if (!riotStarted && now - started >= TimeSpan.FromSeconds(11))
-            {
-                if (autoOpen) LaunchRiot(true);
-                riotStarted = true;
-            }
             if (now >= nextStatus)
             {
-                if (riotStarted && !ClientRunning() && !IsRunning("RiotClientServices", "RiotClientUx", "RiotClientUxRender"))
+                bool riotRunning = IsRunning("RiotClientServices", "RiotClientUx", "RiotClientUxRender", "Riot Client");
+                if (!riotRunning && !ClientRunning())
                 {
                     if (!riotMissingSince.HasValue) riotMissingSince = now;
                     if (now - riotMissingSince.Value >= TimeSpan.FromSeconds(10))
@@ -297,15 +289,15 @@ internal sealed class LeagueLauncher
                         "DownloadingHint",
                         found ? Math.Min(99, percent) : (double?)null));
                 }
-                else if (riotStarted && (target != Chinese || HasLanguageResources()) &&
+                else if (riotRunning && (target != Chinese || HasLanguageResources()) &&
                     ((patch != null && patch.Groups[1].Value == "UpToDate") || (patch == null && !sawDownload)))
                     progress.Report(new LaunchStatus("AssetsReady", "AssetsReadyHint", 100));
-                else if (riotStarted && now - started > TimeSpan.FromSeconds(50))
+                else if (riotRunning && now - started > TimeSpan.FromSeconds(50))
                 {
                     progress.Report(new LaunchStatus("WaitUpdate",
                         "WaitUpdateHint"));
                 }
-                else if (riotStarted)
+                else if (riotRunning)
                     progress.Report(new LaunchStatus("WaitRiot", "WaitRiotHint"));
                 nextStatus = now.AddSeconds(2);
             }

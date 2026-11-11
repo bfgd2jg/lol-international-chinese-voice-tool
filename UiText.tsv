@@ -6,17 +6,15 @@ HeroTitle	LOL国际服改中文语音工具	LoL Chinese Voice Tool
 HeroDetail	切换国际服的文字和英雄语音	Switch the international client’s text and champion voices
 Checking	正在检查安装	Checking installation
 UpdateProgress	语言资源更新进度	Language download progress
-Start	切换简中并启动	Launch in Chinese
+Start	切换为简中	Switch to Chinese
 Restore	恢复原语言	Restore language
 Footnote	工具会自动等待语言资源并确认启动语言。按 Riot 提示点「更新」或「游玩」。	The tool waits for language files and verifies League's startup language. Click Update or Play in Riot when prompted.
-Theme	界面主题	Theme
 ThemeSystem	跟随系统	System
-ThemeLight	浅色	Light
-ThemeDark	深色	Dark
+ThemeLight	切换为浅色模式	Switch to light theme
+ThemeDark	切换为深色模式	Switch to dark theme
+ThemeLightHint	切换为浅色模式。右键可选跟随系统。	Switch to light theme. Right-click to follow Windows.
+ThemeDarkHint	切换为深色模式。右键可选跟随系统。	Switch to dark theme. Right-click to follow Windows.
 UiLanguage	启动器语言	Launcher language
-LaunchMode	启动方式	Launch behavior
-AutoLaunch	自动打开英雄联盟	Open League automatically
-ManualLaunch	在 Riot 手动点游玩	Click Play in Riot
 InstallLocation	游戏安装位置	Game installation
 AutoDetect	使用自动识别	Use auto-detect
 ChoosePath	手动选择	Choose manually
@@ -27,12 +25,12 @@ PathUnknown	未识别到安装位置	Install location not detected
 ChooseGame	选择英雄联盟安装目录里的 LeagueClient.exe	Select LeagueClient.exe in your League installation
 ChooseFilter	英雄联盟客户端 (LeagueClient.exe)|LeagueClient.exe	League Client (LeagueClient.exe)|LeagueClient.exe
 ManualPathInvalid	请选择安装目录中的 LeagueClient.exe。	Select LeagueClient.exe in the installation directory.
-PrefsHint	设置自动保存。启动选项在下次切换时生效。	Settings save automatically. Launch options apply next time.
-PrefsSaved	设置已保存。启动选项在下次切换时生效。	Settings saved. Launch options apply next time.
+PrefsHint	设置自动保存。	Settings save automatically.
+PrefsSaved	设置已保存。	Settings saved.
 PrefsFailure	无法保存。当前设置在这次打开期间有效。	Couldn't save settings. Changes apply for this session.
 AlreadyRunning	启动器已经打开。	The launcher is already open.
 ConfigCurrent	当前设置为 {0}	Current setting: {0}
-ConfigChinese	可从这里启动。工具会核对客户端的实际语言。	Launch here to verify the language League actually uses.
+ConfigChinese	可通过下方按钮打开 Riot，再手动点「游玩」。	Use the button below to open Riot, then click Play.
 ConfigOther	点下方按钮切换到大陆简中。资源由 Riot 客户端下载。	Use the button below to switch to Simplified Chinese. Riot downloads the language files.
 InstallUnrecognized	暂时无法识别安装	Installation not recognized
 Stop	停止等待	Stop waiting
@@ -72,7 +70,6 @@ LobbyHint	先退出英雄联盟大厅，再切换游戏语言。	Exit the League
 RiotUpdating	Riot 正在更新	Riot is updating
 RiotUpdatingHint	等当前更新完成后再切换语言。	Wait for the current update to finish before switching.
 RiotStarting	正在启动 Riot	Starting Riot
-RiotStartingAuto	等启动器就绪后会自动请求打开英雄联盟。	The launcher will ask Riot to open League once it starts.
 RiotStartingManual	Riot 打开后，在英雄联盟页面点「更新」或「游玩」。	Open League in Riot and click Update or Play.
 MatchStarted	检测到对局已开始	A match has started
 MatchStartedHint	语言设置将在下次启动客户端时重新读取。	League will read the language setting again next time it starts.
