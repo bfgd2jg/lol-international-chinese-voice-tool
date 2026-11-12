@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -19,9 +21,19 @@ internal static class Verify
     [STAThread]
     public static void Main(string[] args)
     {
+        if (args.Length == 1 && args[0] == RiotPlayButton.WorkerArgument)
+        {
+            using (var self = Process.GetCurrentProcess())
+                File.WriteAllText(Encoding.UTF8.GetString(Convert.FromBase64String(Console.ReadLine())), self.Id.ToString());
+            Thread.Sleep(Timeout.Infinite);
+            return;
+        }
         Program.ConfigureDpi();
         string root = args[0];
         Directory.CreateDirectory(root);
+        VerifyWorkerCleanup(root, cancelEarly: true);
+        VerifyWorkerCleanup(root, cancelEarly: false);
+        Console.WriteLine("Blocked Play workers exit on cancellation and timeout.");
         string file = Path.Combine(root, "Riot fixture.yaml");
         string original = "locale_data:\r\n    default_locale: \"zh_TW\"\r\n" +
             "settings:\r\n    locale: \"zh_MY\" # 原语言\r\n    preserve: \"字\"\r\n" +
@@ -175,6 +187,35 @@ internal static class Verify
         if (!condition) throw new InvalidOperationException("A launcher verification failed.");
     }
 
+    private static void VerifyWorkerCleanup(string root, bool cancelEarly)
+    {
+        string marker = Path.Combine(root, "worker-" + Guid.NewGuid().ToString("N") + ".pid");
+        using (var cancel = new CancellationTokenSource())
+        {
+            var invocation = Task.Run(() => RiotPlayButton.RunWorker(Assembly.GetExecutingAssembly().Location, marker, cancel.Token));
+            try
+            {
+                Require(SpinWait.SpinUntil(() => File.Exists(marker) && new FileInfo(marker).Length > 0, 2500));
+                using (var worker = Process.GetProcessById(Int32.Parse(File.ReadAllText(marker))))
+                {
+                    if (cancelEarly)
+                    {
+                        cancel.Cancel();
+                        try { invocation.GetAwaiter().GetResult(); throw new InvalidOperationException("Expected cancellation."); }
+                        catch (OperationCanceledException) { }
+                    }
+                    else Require(!invocation.GetAwaiter().GetResult());
+                    Require(worker.WaitForExit(1000));
+                }
+            }
+            finally
+            {
+                cancel.Cancel();
+                File.Delete(marker);
+            }
+        }
+    }
+
     private static void VerifyAutoPlay()
     {
         var page = new StackPanel();
@@ -216,8 +257,7 @@ internal static class Verify
     {
         var dispatcher = Dispatcher.CurrentDispatcher;
         var frame = new DispatcherFrame();
-        var invocation = Task.Run(() => RiotPlayButton.TryInvokeOnLeaguePage(
-            AutomationElement.FromHandle(handle), CancellationToken.None));
+        var invocation = Task.Run(() => RiotPlayButton.TryInvokeOnLeaguePage(AutomationElement.FromHandle(handle)));
         invocation.ContinueWith(task => dispatcher.BeginInvoke(new Action(() => frame.Continue = false)));
         Dispatcher.PushFrame(frame);
         return invocation.GetAwaiter().GetResult();

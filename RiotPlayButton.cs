@@ -2,13 +2,19 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Automation;
 using Rect = System.Windows.Rect;
 
 internal static class RiotPlayButton
 {
+    internal const string WorkerArgument = "--riot-play-worker";
+    private const int WorkerTimeoutMilliseconds = 4000;
+
     private static readonly Condition LeaguePageLink = new AndCondition(
         new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Hyperlink),
         new OrCondition(
@@ -26,6 +32,76 @@ internal static class RiotPlayButton
 
     public static bool TryInvoke(string riotExe, CancellationToken cancel)
     {
+        return RunWorker(Assembly.GetEntryAssembly().Location, riotExe, cancel);
+    }
+
+    internal static bool RunWorker(string launcherExe, string riotExe, CancellationToken cancel)
+    {
+        cancel.ThrowIfCancellationRequested();
+        var startInfo = new ProcessStartInfo(launcherExe, WorkerArgument) {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardInput = true
+        };
+        using (Process worker = Process.Start(startInfo))
+        {
+            try
+            {
+                using (cancel.Register(() => StopWorker(worker)))
+                {
+                    cancel.ThrowIfCancellationRequested();
+                    worker.StandardInput.WriteLine(Convert.ToBase64String(Encoding.UTF8.GetBytes(riotExe)));
+                    worker.StandardInput.Flush();
+                    bool exited = worker.WaitForExit(WorkerTimeoutMilliseconds);
+                    cancel.ThrowIfCancellationRequested();
+                    return exited && worker.ExitCode == 0;
+                }
+            }
+            catch (IOException)
+            {
+                cancel.ThrowIfCancellationRequested();
+                return false;
+            }
+            finally { StopWorker(worker); }
+        }
+    }
+
+    internal static int RunWorkerMode()
+    {
+        string request = Console.ReadLine();
+        if (String.IsNullOrWhiteSpace(request)) return 1;
+        string riotExe;
+        try { riotExe = Encoding.UTF8.GetString(Convert.FromBase64String(request)); }
+        catch (FormatException) { return 1; }
+
+        // The owner keeps stdin open for the lifetime of the probe. EOF also
+        // stops a blocked probe if the owner is closed outside its normal exit path.
+        var watchOwner = new Thread(() => {
+            try { Console.ReadLine(); }
+            catch (IOException) { }
+            using (Process self = Process.GetCurrentProcess()) StopWorker(self);
+        }) { IsBackground = true };
+        watchOwner.Start();
+
+        // UI Automation providers can stall. Run the cross-process calls in
+        // this disposable worker, on an MTA thread separate from the app window.
+        return Task.Run(() => InvokeFromRiotWindow(riotExe)).GetAwaiter().GetResult() ? 0 : 1;
+    }
+
+    private static void StopWorker(Process worker)
+    {
+        try
+        {
+            if (worker.HasExited) return;
+            worker.Kill();
+            worker.WaitForExit(500);
+        }
+        catch (InvalidOperationException) { }
+        catch (Win32Exception) { }
+    }
+
+    private static bool InvokeFromRiotWindow(string riotExe)
+    {
         string riotDirectory = Path.GetDirectoryName(riotExe) + Path.DirectorySeparatorChar;
         foreach (string processName in new[] { "Riot Client", "RiotClientUx" })
         {
@@ -34,7 +110,6 @@ internal static class RiotPlayButton
             {
                 foreach (Process process in processes)
                 {
-                    cancel.ThrowIfCancellationRequested();
                     try
                     {
                         IntPtr handle = process.MainWindowHandle;
@@ -43,7 +118,7 @@ internal static class RiotPlayButton
                             continue;
 
                         var window = AutomationElement.FromHandle(handle);
-                        if (TryInvokeOnLeaguePage(window, cancel)) return true;
+                        if (TryInvokeOnLeaguePage(window)) return true;
                     }
                     catch (ElementNotAvailableException) { }
                     catch (ElementNotEnabledException) { }
@@ -61,7 +136,7 @@ internal static class RiotPlayButton
         return false;
     }
 
-    internal static bool TryInvokeOnLeaguePage(AutomationElement window, CancellationToken cancel)
+    internal static bool TryInvokeOnLeaguePage(AutomationElement window)
     {
         if (window == null || window.Current.IsOffscreen ||
             window.FindFirst(TreeScope.Descendants, LeaguePageLink) == null) return false;
@@ -75,7 +150,6 @@ internal static class RiotPlayButton
                 !windowBounds.Contains(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2) ||
                 !button.TryGetCurrentPattern(InvokePattern.Pattern, out pattern)) continue;
 
-            cancel.ThrowIfCancellationRequested();
             ((InvokePattern)pattern).Invoke();
             return true;
         }

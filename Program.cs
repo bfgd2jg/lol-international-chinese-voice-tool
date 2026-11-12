@@ -15,14 +15,16 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.2.2.0")]
-[assembly: AssemblyFileVersion("1.2.2.0")]
+[assembly: AssemblyVersion("1.2.3.0")]
+[assembly: AssemblyFileVersion("1.2.3.0")]
 
 internal static class Program
 {
     [STAThread]
-    public static void Main()
+    public static int Main(string[] args)
     {
+        if (args.Length == 1 && args[0] == RiotPlayButton.WorkerArgument)
+            return RiotPlayButton.RunWorkerMode();
         ConfigureDpi();
         bool acquired;
         using (var instance = new Mutex(true, @"Local\LeagueChineseLocaleLauncher", out acquired))
@@ -32,13 +34,16 @@ internal static class Program
                 var saved = LauncherPreferences.Load(Path.Combine(LauncherPreferences.AppDirectory, "preferences.json"));
                 var text = new UiText(saved.UiLanguage);
                 MessageBox.Show(text.Get("AlreadyRunning"), text.Get("AppTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                return 0;
             }
-            var app = new Application();
-            var window = LoadWindow();
-            new LauncherWindow(window).Initialize();
-            app.Run(window);
-            instance.ReleaseMutex();
+            try
+            {
+                var app = new Application { ShutdownMode = ShutdownMode.OnMainWindowClose };
+                var window = LoadWindow();
+                new LauncherWindow(window).Initialize();
+                return app.Run(window);
+            }
+            finally { instance.ReleaseMutex(); }
         }
     }
 
@@ -84,6 +89,7 @@ internal sealed class LauncherWindow
     private string detectedGamePath;
     private LeagueLauncher engine;
     private CancellationTokenSource operation;
+    private bool closing;
 
     public LauncherWindow(Window view, string appDataDirectory = null)
     {
@@ -131,7 +137,10 @@ internal sealed class LauncherWindow
         window.LocationChanged += (sender, args) => FitWindowToScreen();
         window.DpiChanged += OnDisplaySettingsChanged;
         window.Activated += (sender, args) => { if (preferences.Theme == ThemeMode.System) ApplyTheme(); };
-        window.Closing += (sender, args) => { if (operation != null) operation.Cancel(); };
+        window.Closing += (sender, args) => {
+            closing = true;
+            if (operation != null) operation.Cancel();
+        };
         window.Closed += (sender, args) => {
             SystemEvents.UserPreferenceChanged -= OnSystemPreferenceChanged;
             SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
@@ -283,6 +292,7 @@ internal sealed class LauncherWindow
 
     private void Show(LaunchStatus status)
     {
+        if (closing) return;
         lastStatus = status;
         title.Text = status.Title.Render(text);
         AutomationProperties.SetName(title, title.Text);
@@ -353,7 +363,7 @@ internal sealed class LauncherWindow
         {
             operation = null;
             cancel.Dispose();
-            Buttons();
+            if (!closing) Buttons();
         }
     }
 }
