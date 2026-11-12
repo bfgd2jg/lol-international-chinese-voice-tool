@@ -22,7 +22,7 @@ ManualPathInvalid	请选择安装目录中的 LeagueClient.exe。	Select LeagueC
 PrefsFailure	无法保存。当前设置在这次打开期间有效。	Couldn't save settings. Changes apply for this session.
 AlreadyRunning	启动器已经打开。	The launcher is already open.
 ConfigCurrent	当前设置为 {0}	Current setting: {0}
-ConfigChinese	点下方按钮打开 Riot 的英雄联盟页面，再点「游玩」。	Open the League page in Riot, then click Play.
+ConfigChinese	点下方按钮，Riot 就绪后会自动启动 LOL。	Use the button below to launch League when Riot is ready.
 ConfigOther	简中启动会应用语言，再打开 Riot 的英雄联盟页面。	Launch in Chinese to apply the language and open the League page in Riot.
 InstallUnrecognized	暂时无法识别安装	Installation not recognized
 Stop	停止等待	Stop waiting
@@ -62,6 +62,7 @@ LobbyHint	先退出英雄联盟大厅，再切换游戏语言。	Exit the League
 RiotUpdating	Riot 正在更新	Riot is updating
 RiotUpdatingHint	等当前更新完成后再切换语言。	Wait for the current update to finish before switching.
 RiotStarting	正在打开英雄联盟	Opening League in Riot
+RiotStartingAuto	Riot 就绪后会自动启动 LOL。若需要登录或更新，请按 Riot 提示处理。	League will start automatically when Riot is ready. Sign in or update if Riot asks.
 RiotStartingManual	在 Riot 的英雄联盟页面按提示点「更新」或「游玩」。	Click Update or Play on the League page in Riot.
 MatchStarted	检测到对局已开始	A match has started
 MatchStartedHint	语言设置将在下次启动客户端时重新读取。	League will read the language setting again next time it starts.
@@ -69,10 +70,15 @@ WrongLocale	Riot 用了 {0}	Riot started in {0}
 WrongLocaleHint	先退出大厅和托盘里的 Riot 客户端，再通过这里重试。	Exit the lobby and quit Riot from the system tray, then retry here.
 Downloading	Riot 正在下载或安装语言资源	Riot is installing language files
 DownloadingHint	保持启动器打开。下载完成后，在 Riot 客户端点「游玩」。	Keep this window open. Click Play in Riot when the download finishes.
+DownloadingAutoHint	下载完成后，工具会自动启动 LOL。	The tool will launch League when the download finishes.
 AssetsReady	语言资源就绪	Language files ready
 AssetsReadyHint	在 Riot 客户端点「游玩」。这里会自动确认大厅语言。	Click Play in Riot. The launcher will verify the lobby language.
+AssetsReadyAutoHint	等待 Riot 的「游玩」可用，随后自动启动。	Waiting for Play in Riot to become available. League will start automatically.
+LaunchingLeague	正在启动 LOL	Launching League
+LaunchingLeagueHint	已触发 Riot 的「游玩」，正在确认启动语言。	Play was triggered in Riot. Verifying League’s startup language.
 WaitUpdate	等待 Riot 开始更新	Waiting for Riot to update
 WaitUpdateHint	在 Riot 客户端点「更新」或「游玩」。如果仍显示旧语言，退出 Riot 后再试。	Click Update or Play in Riot. If the old language is still shown, quit Riot and retry.
+WaitUpdateAutoHint	若 Riot 要求登录或更新，请按提示处理。就绪后会自动启动 LOL。	Sign in or update if Riot asks. League will start automatically when ready.
 WaitRiot	等待 Riot 加载资源	Waiting for Riot to load files
 WaitRiotHint	若 Riot 显示「更新」或「游玩」，点一次即可。	Click Update or Play if Riot offers it.
 RiotClosed	Riot 客户端已退出	Riot Client has closed

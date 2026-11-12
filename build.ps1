@@ -10,9 +10,11 @@ if (!(Test-Path -LiteralPath $compiler)) { throw 'The .NET Framework C# compiler
 
 $output = New-Item -ItemType Directory -Force -Path (Join-Path $PSScriptRoot 'artifacts')
 $references = @('WPF\PresentationFramework.dll', 'WPF\PresentationCore.dll', 'WPF\WindowsBase.dll',
+    'WPF\UIAutomationClient.dll', 'WPF\UIAutomationTypes.dll',
     'System.Xaml.dll', 'System.Web.Extensions.dll', 'System.Windows.Forms.dll', 'System.Drawing.dll') |
     ForEach-Object { '/reference:' + (Join-Path $framework $_) }
-$sources = @('Program.cs', 'LauncherPreferences.cs', 'UiText.cs', 'WindowTheme.cs', 'LocaleFile.cs', 'LeagueLauncher.cs') |
+$sources = @('Program.cs', 'LauncherPreferences.cs', 'UiText.cs', 'WindowTheme.cs', 'LocaleFile.cs', 'LeagueLauncher.cs',
+    'RiotPlayButton.cs') |
     ForEach-Object { Join-Path $PSScriptRoot $_ }
 $options = @('/nologo', '/optimize+', '/codepage:65001',
     ('/win32manifest:' + (Join-Path $PSScriptRoot 'app.manifest')),

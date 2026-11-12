@@ -3,11 +3,15 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using System.Web.Script.Serialization;
 
 internal static class Verify
@@ -88,7 +92,8 @@ internal static class Verify
             && defaults.UiLanguage == "zh-CN" && defaults.GamePath == null);
         defaults.Theme = ThemeMode.Light;
         defaults.Save(preferenceFile);
-        var app = new Application();
+        var app = new Application { ShutdownMode = ShutdownMode.OnExplicitShutdown };
+        VerifyAutoPlay();
         Window window = Program.LoadWindow();
         Require(window.Width == 420 && window.Width == window.MinWidth
             && window.Height == 380 && window.Height == window.MinHeight);
@@ -136,7 +141,7 @@ internal static class Verify
         Draw(window, 404, 341, Path.Combine(root, "settings-compact-150.png"), 144);
         pathButtons.Children.Remove(focusCue);
         ((TextBlock)window.FindName("StateTitle")).Text = "Riot 正在下载或安装语言资源";
-        ((TextBlock)window.FindName("StateDetail")).Text = "保持启动器打开。下载完成后，在 Riot 客户端点「游玩」。";
+        ((TextBlock)window.FindName("StateDetail")).Text = "下载完成后，工具会自动启动 LOL。";
         var progress = (ProgressBar)window.FindName("Progress");
         ((FrameworkElement)window.FindName("ProgressRow")).Visibility = Visibility.Visible;
         progress.Value = 63;
@@ -168,6 +173,54 @@ internal static class Verify
     private static void Require(bool condition)
     {
         if (!condition) throw new InvalidOperationException("A launcher verification failed.");
+    }
+
+    private static void VerifyAutoPlay()
+    {
+        var page = new StackPanel();
+        var link = new Hyperlink(new Run("example.com"));
+        page.Children.Add(new TextBlock(link));
+        var disabled = new Button { Content = "遊玩", IsEnabled = false, Height = 28 };
+        var hidden = new Button { Content = "遊玩", Visibility = Visibility.Collapsed, Height = 28 };
+        var play = new Button { Content = "遊玩", Height = 28 };
+        int clicks = 0;
+        play.Click += (sender, args) => clicks++;
+        disabled.Click += (sender, args) => { throw new InvalidOperationException("Disabled Play was invoked."); };
+        hidden.Click += (sender, args) => { throw new InvalidOperationException("Hidden Play was invoked."); };
+        page.Children.Add(disabled);
+        page.Children.Add(hidden);
+        page.Children.Add(play);
+
+        var fixture = new Window {
+            Width = 320, Height = 240, Left = -20000, Top = -20000,
+            WindowStyle = WindowStyle.None, AllowsTransparency = true, Opacity = 0,
+            ShowInTaskbar = false, ShowActivated = false, Content = page
+        };
+        fixture.Show();
+        try
+        {
+            IntPtr handle = new System.Windows.Interop.WindowInteropHelper(fixture).Handle;
+            Require(!InvokeFixturePlay(handle) && clicks == 0);
+            AutomationProperties.SetName(link, "leagueoflegends.com");
+            Require(InvokeFixturePlay(handle));
+            fixture.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(() => { }));
+            Require(clicks == 1);
+            play.IsEnabled = false;
+            Require(!InvokeFixturePlay(handle) && clicks == 1);
+            Console.WriteLine("UI Automation verified the League page and invoked only enabled, visible Play.");
+        }
+        finally { fixture.Close(); }
+    }
+
+    private static bool InvokeFixturePlay(IntPtr handle)
+    {
+        var dispatcher = Dispatcher.CurrentDispatcher;
+        var frame = new DispatcherFrame();
+        var invocation = Task.Run(() => RiotPlayButton.TryInvokeOnLeaguePage(
+            AutomationElement.FromHandle(handle), CancellationToken.None));
+        invocation.ContinueWith(task => dispatcher.BeginInvoke(new Action(() => frame.Continue = false)));
+        Dispatcher.PushFrame(frame);
+        return invocation.GetAwaiter().GetResult();
     }
     private static void Draw(Window window, int width, int height, string file, int dpi = 96)
     {

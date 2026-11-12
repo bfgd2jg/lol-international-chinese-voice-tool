@@ -225,17 +225,17 @@ internal sealed class LeagueLauncher
 
     public Task<LaunchStatus> LaunchInChinese(IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
-        return UseLanguage(Chinese, progress, cancel);
+        return UseLanguage(Chinese, true, progress, cancel);
     }
 
     public async Task<LaunchStatus> Restore(IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
         string original = OriginalLocale;
         if (original == null) return new LaunchStatus("NoBackup", "RestoreUnavailable");
-        return await UseLanguage(original, progress, cancel).ConfigureAwait(false);
+        return await UseLanguage(original, false, progress, cancel).ConfigureAwait(false);
     }
 
-    private async Task<LaunchStatus> UseLanguage(string target,
+    private async Task<LaunchStatus> UseLanguage(string target, bool autoPlay,
         IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
         if (GameRunning()) return new LaunchStatus("InGame", "InGameHint");
@@ -254,9 +254,10 @@ internal sealed class LeagueLauncher
         DateTime started = DateTime.UtcNow;
         DateTime nextStatus = started;
         bool sawDownload = false;
+        bool playRequested = false;
         DateTime? riotMissingSince = null;
         OpenRiotLeaguePage();
-        progress.Report(new LaunchStatus("RiotStarting", "RiotStartingManual"));
+        progress.Report(new LaunchStatus("RiotStarting", autoPlay ? "RiotStartingAuto" : "RiotStartingManual"));
 
         while (true)
         {
@@ -287,20 +288,28 @@ internal sealed class LeagueLauncher
                     double percent;
                     bool found = Double.TryParse(patch.Groups[2].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out percent);
                     sawDownload = true;
+                    playRequested = false;
                     progress.Report(new LaunchStatus("Downloading",
-                        "DownloadingHint",
+                        autoPlay ? "DownloadingAutoHint" : "DownloadingHint",
                         found ? Math.Min(99, percent) : (double?)null));
                 }
+                else if (playRequested)
+                    progress.Report(new LaunchStatus("LaunchingLeague", "LaunchingLeagueHint"));
                 else if (riotRunning && (target != Chinese || HasLanguageResources()) &&
                     ((patch != null && patch.Groups[1].Value == "UpToDate") || (patch == null && !sawDownload)))
-                    progress.Report(new LaunchStatus("AssetsReady", "AssetsReadyHint", 100));
+                {
+                    if (autoPlay && !ClientRunning()) playRequested = RiotPlayButton.TryInvoke(install.RiotExe, cancel);
+                    progress.Report(playRequested
+                        ? new LaunchStatus("LaunchingLeague", "LaunchingLeagueHint")
+                        : new LaunchStatus("AssetsReady", autoPlay ? "AssetsReadyAutoHint" : "AssetsReadyHint", 100));
+                }
                 else if (riotRunning && now - started > TimeSpan.FromSeconds(50))
                 {
                     progress.Report(new LaunchStatus("WaitUpdate",
-                        "WaitUpdateHint"));
+                        autoPlay ? "WaitUpdateAutoHint" : "WaitUpdateHint"));
                 }
                 else if (riotRunning)
-                    progress.Report(new LaunchStatus("WaitRiot", "WaitRiotHint"));
+                    progress.Report(new LaunchStatus("WaitRiot", autoPlay ? "RiotStartingAuto" : "WaitRiotHint"));
                 nextStatus = now.AddSeconds(2);
             }
             await Task.Delay(300, cancel).ConfigureAwait(false);
