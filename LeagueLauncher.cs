@@ -187,10 +187,12 @@ internal sealed class LeagueLauncher
             && File.Exists(Path.Combine(install.GameRoot, "Game", "DATA", "FINAL", "Localized", "Global.zh_CN.wad.client"))
             && File.Exists(Path.Combine(install.GameRoot, "Game", "DATA", "FINAL", "Champions", "Aatrox.zh_CN.wad.client"));
     }
-    private void OpenRiot()
+    private void OpenRiotLeaguePage()
     {
         var info = new ProcessStartInfo(install.RiotExe) {
-            UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(install.RiotExe)
+            UseShellExecute = true,
+            WorkingDirectory = Path.GetDirectoryName(install.RiotExe),
+            Arguments = "--launch-product=league_of_legends --launch-patchline=live"
         };
         using (Process launcher = Process.Start(info)) { }
     }
@@ -221,7 +223,7 @@ internal sealed class LeagueLauncher
         return new LaunchStatus(title, detail, files ? 100 : (double?)null);
     }
 
-    public Task<LaunchStatus> SwitchToChinese(IProgress<LaunchStatus> progress, CancellationToken cancel)
+    public Task<LaunchStatus> LaunchInChinese(IProgress<LaunchStatus> progress, CancellationToken cancel)
     {
         return UseLanguage(Chinese, progress, cancel);
     }
@@ -253,7 +255,7 @@ internal sealed class LeagueLauncher
         DateTime nextStatus = started;
         bool sawDownload = false;
         DateTime? riotMissingSince = null;
-        OpenRiot();
+        OpenRiotLeaguePage();
         progress.Report(new LaunchStatus("RiotStarting", "RiotStartingManual"));
 
         while (true)
