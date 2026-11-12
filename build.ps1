@@ -19,7 +19,8 @@ $options = @('/nologo', '/optimize+', '/codepage:65001',
     ('/resource:' + (Join-Path $PSScriptRoot 'Main.xaml') + ',Launcher.Main.xaml'),
     ('/resource:' + (Join-Path $PSScriptRoot 'UiText.tsv') + ',Launcher.UiText.tsv')) + $references
 $launcher = Join-Path $output.FullName 'LOL国际服改中文语音工具.exe'
-& $compiler @options '/target:winexe' ('/out:' + $launcher) @sources
+$appIcon = Join-Path $PSScriptRoot 'assets\app-icon.ico'
+& $compiler @options '/target:winexe' ('/win32icon:' + $appIcon) ('/out:' + $launcher) @sources
 if ($LASTEXITCODE -ne 0) { throw 'Launcher build failed.' }
 
 if ($Verify) {
