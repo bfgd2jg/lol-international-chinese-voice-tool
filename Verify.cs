@@ -122,7 +122,8 @@ internal static class Verify
         var theme = (Button)window.FindName("ThemeButton");
         var scroll = (ScrollViewer)window.FindName("PageScroll");
         Require(!autoPathItem.IsEnabled && AutomationProperties.GetName(manualPath) == "手动选择");
-        Require(AutomationProperties.GetName(theme) == "切换为深色模式");
+        Require(theme.ContextMenu == null && manualPath.ContextMenu != null);
+        Require(AutomationProperties.GetName(theme) == "切换为深色模式" && (string)theme.ToolTip == "切换为深色模式");
         Draw(window, 404, 341, Path.Combine(root, "settings-light.png"));
         theme.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
         language.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
@@ -177,9 +178,6 @@ internal static class Verify
         Require(((TextBlock)reopened.FindName("InstallPath")).Text == "Manual · " + game);
         Require(((MenuItem)reopened.FindName("AutoPathItem")).IsEnabled
             && AutomationProperties.GetName((Button)reopened.FindName("ManualPathButton")) == "Change path");
-        var systemThemeItem = (MenuItem)window.FindName("SystemThemeItem");
-        systemThemeItem.RaiseEvent(new RoutedEventArgs(MenuItem.ClickEvent));
-        Require(LauncherPreferences.Load(preferenceFile).Theme == ThemeMode.System);
         window.Close();
         Console.WriteLine("WPF pages rendered, and settings persist on reopening.");
     }

@@ -4,11 +4,8 @@ Checking	正在检查安装	Checking installation
 UpdateProgress	语言资源更新进度	Language download progress
 Start	简中启动 LOL	Launch LoL in Chinese
 Restore	恢复原语言	Restore language
-ThemeSystem	跟随系统	System
 ThemeLight	切换为浅色模式	Switch to light theme
 ThemeDark	切换为深色模式	Switch to dark theme
-ThemeLightHint	切换为浅色模式。右键可选跟随系统。	Switch to light theme. Right-click to follow Windows.
-ThemeDarkHint	切换为深色模式。右键可选跟随系统。	Switch to dark theme. Right-click to follow Windows.
 InstallLocation	游戏安装位置	Game installation
 AutoDetect	恢复自动识别	Restore automatic detection
 ChoosePath	手动选择	Choose manually
@@ -94,5 +91,5 @@ UpdateAvailable	有新版工具	Tool update available
 UpdateReady	v{0} 已下载，点击安装	v{0} downloaded. Click to install.
 UpdateConfirm	v{0} 已下载。现在关闭工具并安装新版吗？安装后会重新打开工具。	v{0} is ready. Close the tool and install it now? The tool will reopen after installation.
 UpdateCurrent	当前工具已是最新版。	You are using the latest version of the tool.
-UpdateFailed	暂时无法检查或下载更新。可以稍后再试。	Could not check for or download an update. Try again later.
+UpdateFailed	暂时无法检查或下载更新。可以重试，或从 GitHub 发行页下载安装包。	Could not check for or download an update. Retry or download Setup from GitHub Releases.
 UpdateInstallFailed	无法启动安装器。请重新检查更新，或从发行页下载安装包。	Could not start the installer. Check for updates again or download Setup from the release page.

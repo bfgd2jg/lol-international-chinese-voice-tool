@@ -17,8 +17,8 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.3.1.0")]
-[assembly: AssemblyFileVersion("1.3.1.0")]
+[assembly: AssemblyVersion("1.3.2.0")]
+[assembly: AssemblyFileVersion("1.3.2.0")]
 
 internal static class Program
 {
@@ -134,8 +134,6 @@ internal sealed class LauncherWindow
             AnimateEntrance(languageButton);
         };
         themeButton.Click += (sender, args) => SetTheme(darkTheme ? ThemeMode.Light : ThemeMode.Dark);
-        var systemThemeItem = (MenuItem)view.FindName("SystemThemeItem");
-        systemThemeItem.Click += (sender, args) => SetTheme(ThemeMode.System);
         autoPathItem.Click += (sender, args) => SelectGamePath(null);
         manualPathButton.Click += ChooseGamePath;
         ApplyUiLanguage();
@@ -310,7 +308,7 @@ internal sealed class LauncherWindow
         darkTheme = WindowTheme.Apply(window, preferences.Theme);
         themeGlyph.SetResourceReference(System.Windows.Shapes.Path.DataProperty, darkTheme ? "SunIcon" : "MoonIcon");
         themeButton.SetResourceReference(AutomationProperties.NameProperty, darkTheme ? "ThemeLight" : "ThemeDark");
-        themeButton.SetResourceReference(FrameworkElement.ToolTipProperty, darkTheme ? "ThemeLightHint" : "ThemeDarkHint");
+        themeButton.SetResourceReference(FrameworkElement.ToolTipProperty, darkTheme ? "ThemeLight" : "ThemeDark");
         themeButton.IsEnabled = !SystemParameters.HighContrast;
     }
 

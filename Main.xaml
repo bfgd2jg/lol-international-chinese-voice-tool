@@ -146,12 +146,6 @@
           <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource UpdateIcon}"/>
         </Button>
         <Button x:Name="ThemeButton" Style="{StaticResource ToolbarButton}" Margin="0,0,8,0">
-          <Button.ContextMenu>
-            <ContextMenu Background="{DynamicResource Panel}" Foreground="{DynamicResource Ink}"
-                         BorderBrush="{DynamicResource Border}">
-              <MenuItem x:Name="SystemThemeItem" Header="{DynamicResource ThemeSystem}"/>
-            </ContextMenu>
-          </Button.ContextMenu>
           <Path x:Name="ThemeGlyph" Style="{StaticResource ToolbarGlyph}"/>
         </Button>
         <Button x:Name="LanguageButton" Style="{StaticResource ToolbarButton}"

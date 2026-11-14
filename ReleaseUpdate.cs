@@ -14,6 +14,13 @@ internal sealed class ReleaseUpdate
     private const string SetupName = "LOL-Chinese-Voice-Tool-Setup.exe";
     private const int MaxInstallerSize = 25 * 1024 * 1024;
 
+    static ReleaseUpdate()
+    {
+        // The standalone .NET Framework build otherwise inherits legacy TLS defaults.
+        AppContext.SetSwitch("Switch.System.Net.DontEnableSchUseStrongCrypto", false);
+        AppContext.SetSwitch("Switch.System.Net.DontEnableSystemDefaultTlsVersions", false);
+    }
+
     public Version Version { get; private set; }
     public string InstallerPath { get; private set; }
     private Manifest DownloadedManifest { get; set; }
