@@ -11,6 +11,7 @@
     <sys:Double x:Key="HeadingSize">16</sys:Double>
     <Geometry x:Key="ChineseLanguageIcon">M 11,3 L 13,6 M 3,8 H 21 M 7.5,8 C 9,14 14,18.5 21,21 M 16.5,8 C 15,14 10,18.5 3,21</Geometry>
     <Geometry x:Key="EnglishLanguageIcon">M 4,21 L 12,3 20,21 M 7,15 H 17</Geometry>
+    <Geometry x:Key="UpdateIcon">M 12,3 V 15 M 7,10 L 12,15 17,10 M 4,16 V 20 H 20 V 16</Geometry>
     <Geometry x:Key="FolderIcon">M 3,20 H 19 Q 21,20 21,18 V 8 Q 21,6 19,6 H 11 L 9,4 H 5 Q 3,4 3,6 Z M 3,9 H 21</Geometry>
     <Geometry x:Key="MoonIcon">M 20.6,15.4 A 9,9 0 0 1 8.6,3.4 A 9,9 0 1 0 20.6,15.4 Z</Geometry>
     <Geometry x:Key="SunIcon">M 16,12 A 4,4 0 1 0 8,12 A 4,4 0 1 0 16,12 Z M 12,2 L 12,4 M 12,20 L 12,22 M 2,12 L 4,12 M 20,12 L 22,12 M 5,5 L 6.5,6.5 M 17.5,17.5 L 19,19 M 19,5 L 17.5,6.5 M 6.5,17.5 L 5,19</Geometry>
@@ -141,6 +142,9 @@
     <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
     <Grid Margin="24,14,24,10" MaxWidth="650">
       <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+        <Button x:Name="UpdateButton" Style="{StaticResource ToolbarButton}" Margin="0,0,8,0">
+          <Path Style="{StaticResource ToolbarGlyph}" Data="{StaticResource UpdateIcon}"/>
+        </Button>
         <Button x:Name="ThemeButton" Style="{StaticResource ToolbarButton}" Margin="0,0,8,0">
           <Button.ContextMenu>
             <ContextMenu Background="{DynamicResource Panel}" Foreground="{DynamicResource Ink}"

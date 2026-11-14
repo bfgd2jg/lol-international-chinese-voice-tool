@@ -31,6 +31,7 @@ internal static class Verify
         Program.ConfigureDpi();
         string root = args[0];
         Directory.CreateDirectory(root);
+        VerifyUpdateManifest();
         VerifyWorkerCleanup(root, cancelEarly: true);
         VerifyWorkerCleanup(root, cancelEarly: false);
         Console.WriteLine("Blocked Play workers exit on cancellation and timeout.");
@@ -185,6 +186,25 @@ internal static class Verify
     private static void Require(bool condition)
     {
         if (!condition) throw new InvalidOperationException("A launcher verification failed.");
+    }
+
+    private static void VerifyUpdateManifest()
+    {
+        var manifest = new ReleaseUpdate.Manifest {
+            Version = "1.3.0", Size = 3,
+            Sha256 = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        };
+        Require(ReleaseUpdate.GetNewVersion(manifest, new Version(1, 2, 4, 0)) == new Version(1, 3, 0, 0));
+        Require(ReleaseUpdate.GetNewVersion(manifest, new Version(1, 3, 0, 0)) == null);
+        Require(ReleaseUpdate.GetNewVersion(manifest, new Version(1, 4, 0, 0)) == null);
+        using (var valid = new MemoryStream(Encoding.ASCII.GetBytes("abc")))
+            ReleaseUpdate.VerifyInstaller(valid, manifest);
+        using (var corrupt = new MemoryStream(Encoding.ASCII.GetBytes("abd")))
+        {
+            try { ReleaseUpdate.VerifyInstaller(corrupt, manifest); throw new Exception("Corrupt installer was accepted."); }
+            catch (InvalidDataException) { }
+        }
+        Console.WriteLine("Update version ordering and installer integrity checks passed.");
     }
 
     private static void VerifyWorkerCleanup(string root, bool cancelEarly)

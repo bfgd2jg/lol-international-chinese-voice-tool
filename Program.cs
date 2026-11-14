@@ -1,6 +1,8 @@
 using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,8 +17,8 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("LOL国际服改中文语音工具")]
 [assembly: AssemblyDescription("通过 Riot 启动器切换英雄联盟国际服的语言资源")]
-[assembly: AssemblyVersion("1.2.4.0")]
-[assembly: AssemblyFileVersion("1.2.4.0")]
+[assembly: AssemblyVersion("1.3.0.0")]
+[assembly: AssemblyFileVersion("1.3.0.0")]
 
 internal static class Program
 {
@@ -40,7 +42,9 @@ internal static class Program
             {
                 var app = new Application { ShutdownMode = ShutdownMode.OnMainWindowClose };
                 var window = LoadWindow();
-                new LauncherWindow(window).Initialize();
+                var launcher = new LauncherWindow(window);
+                launcher.Initialize();
+                launcher.EnableUpdates();
                 return app.Run(window);
             }
             finally { instance.ReleaseMutex(); }
@@ -71,6 +75,7 @@ internal sealed class LauncherWindow
     private readonly FrameworkElement progressRow;
     private readonly TextBlock progressText;
     private readonly Button themeButton;
+    private readonly Button updateButton;
     private readonly System.Windows.Shapes.Path themeGlyph;
     private readonly System.Windows.Shapes.Path languageGlyph;
     private readonly TextBlock settingsFeedback;
@@ -89,6 +94,9 @@ internal sealed class LauncherWindow
     private string detectedGamePath;
     private LeagueLauncher engine;
     private CancellationTokenSource operation;
+    private readonly CancellationTokenSource updateCancel = new CancellationTokenSource();
+    private ReleaseUpdate pendingUpdate;
+    private bool checkingUpdate;
     private bool closing;
 
     public LauncherWindow(Window view, string appDataDirectory = null)
@@ -108,6 +116,7 @@ internal sealed class LauncherWindow
         progressText = (TextBlock)view.FindName("ProgressText");
         var languageButton = (Button)view.FindName("LanguageButton");
         themeButton = (Button)view.FindName("ThemeButton");
+        updateButton = (Button)view.FindName("UpdateButton");
         themeGlyph = (System.Windows.Shapes.Path)view.FindName("ThemeGlyph");
         languageGlyph = (System.Windows.Shapes.Path)view.FindName("LanguageGlyph");
         settingsFeedback = (TextBlock)view.FindName("SettingsFeedback");
@@ -116,6 +125,10 @@ internal sealed class LauncherWindow
         installPath = (TextBlock)view.FindName("InstallPath");
         start.Click += OnStart;
         restore.Click += OnRestore;
+        updateButton.Click += async (sender, args) => {
+            if (pendingUpdate == null) await CheckForUpdate(true);
+            else OfferUpdate();
+        };
         languageButton.Click += (sender, args) => {
             SetUiLanguage(preferences.UiLanguage == "zh-CN" ? "en-US" : "zh-CN");
             AnimateEntrance(languageButton);
@@ -140,11 +153,83 @@ internal sealed class LauncherWindow
         window.Closing += (sender, args) => {
             closing = true;
             if (operation != null) operation.Cancel();
+            updateCancel.Cancel();
+            if (!checkingUpdate) updateCancel.Dispose();
         };
         window.Closed += (sender, args) => {
             SystemEvents.UserPreferenceChanged -= OnSystemPreferenceChanged;
             SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         };
+    }
+
+    public void EnableUpdates()
+    {
+        window.Loaded += async (sender, args) => await CheckForUpdate(false);
+    }
+
+    private async Task CheckForUpdate(bool interactive)
+    {
+        if (checkingUpdate || closing) return;
+        checkingUpdate = true;
+        UpdateButtonState();
+        try
+        {
+            Version current = Assembly.GetExecutingAssembly().GetName().Version;
+            pendingUpdate = await ReleaseUpdate.DownloadLatest(current, appDirectory, updateCancel.Token);
+            if (!closing && pendingUpdate != null && operation == null) OfferUpdate();
+            else if (interactive && !closing && pendingUpdate == null) ShowUpdateMessage("UpdateCurrent");
+        }
+        catch (Exception error)
+        {
+            if (!IsUpdateError(error)) throw;
+            if (interactive && !closing) ShowUpdateMessage("UpdateFailed");
+        }
+        finally
+        {
+            checkingUpdate = false;
+            if (closing) updateCancel.Dispose();
+            else UpdateButtonState();
+        }
+    }
+
+    private static bool IsUpdateError(Exception error)
+    {
+        return error is IOException || error is InvalidDataException || error is HttpRequestException ||
+            error is ArgumentException || error is InvalidOperationException || error is OperationCanceledException ||
+            error is UnauthorizedAccessException;
+    }
+
+    private void OfferUpdate()
+    {
+        if (operation != null || closing) return;
+        string message = text.Get("UpdateConfirm", pendingUpdate.Version.ToString(3));
+        if (MessageBox.Show(window, message, text.Get("UpdateAvailable"), MessageBoxButton.YesNo,
+            MessageBoxImage.Information) != MessageBoxResult.Yes) return;
+        try { pendingUpdate.Install(preferences.UiLanguage); }
+        catch (Exception error)
+        {
+            if (!(error is Win32Exception) && !IsUpdateError(error)) throw;
+            ShowUpdateMessage("UpdateInstallFailed");
+            pendingUpdate = null;
+            UpdateButtonState();
+            return;
+        }
+        window.Close();
+    }
+
+    private void ShowUpdateMessage(string message)
+    {
+        MessageBox.Show(window, text.Get(message), text.Get("CheckUpdate"), MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void UpdateButtonState()
+    {
+        updateButton.IsEnabled = !checkingUpdate && operation == null;
+        updateButton.SetResourceReference(Control.ForegroundProperty, pendingUpdate == null ? "Ink" : "Accent");
+        string label = checkingUpdate ? text.Get("CheckingUpdate") : pendingUpdate == null
+            ? text.Get("CheckUpdate") : text.Get("UpdateReady", pendingUpdate.Version.ToString(3));
+        updateButton.ToolTip = label;
+        AutomationProperties.SetName(updateButton, label);
     }
 
     private void SetUiLanguage(string language)
@@ -313,6 +398,7 @@ internal sealed class LauncherWindow
         restore.ToolTip = restore.IsEnabled
             ? text.Get("RestoreTooltip", UiMessage.Locale(original)) : text.Get("RestoreUnavailable");
         manualPathButton.IsEnabled = operation == null;
+        UpdateButtonState();
     }
 
     private static UiMessage UserMessage(Exception error)
