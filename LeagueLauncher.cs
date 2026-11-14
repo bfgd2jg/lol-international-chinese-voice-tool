@@ -255,6 +255,7 @@ internal sealed class LeagueLauncher
         DateTime nextStatus = started;
         bool sawDownload = false;
         bool playRequested = false;
+        DateTime? playReadySince = null;
         DateTime? riotMissingSince = null;
         OpenRiotLeaguePage();
         progress.Report(new LaunchStatus("RiotStarting", autoPlay ? "RiotStartingAuto" : "RiotStartingManual"));
@@ -289,6 +290,7 @@ internal sealed class LeagueLauncher
                     bool found = Double.TryParse(patch.Groups[2].Value, NumberStyles.Float, CultureInfo.InvariantCulture, out percent);
                     sawDownload = true;
                     playRequested = false;
+                    playReadySince = null;
                     progress.Report(new LaunchStatus("Downloading",
                         autoPlay ? "DownloadingAutoHint" : "DownloadingHint",
                         found ? Math.Min(99, percent) : (double?)null));
@@ -298,10 +300,12 @@ internal sealed class LeagueLauncher
                 else if (riotRunning && (target != Chinese || HasLanguageResources()) &&
                     ((patch != null && patch.Groups[1].Value == "UpToDate") || (patch == null && !sawDownload)))
                 {
+                    if (!playReadySince.HasValue) playReadySince = now;
                     if (autoPlay && !ClientRunning()) playRequested = RiotPlayButton.TryInvoke(install.RiotExe, cancel);
+                    bool needsManualPlay = !autoPlay || now - playReadySince.Value >= TimeSpan.FromSeconds(10);
                     progress.Report(playRequested
                         ? new LaunchStatus("LaunchingLeague", "LaunchingLeagueHint")
-                        : new LaunchStatus("AssetsReady", autoPlay ? "AssetsReadyAutoHint" : "AssetsReadyHint", 100));
+                        : new LaunchStatus("AssetsReady", needsManualPlay ? "AssetsReadyHint" : "AssetsReadyAutoHint", 100));
                 }
                 else if (riotRunning && now - started > TimeSpan.FromSeconds(50))
                 {

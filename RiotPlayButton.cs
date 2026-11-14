@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Automation;
@@ -20,6 +21,21 @@ internal static class RiotPlayButton
         new OrCondition(
             new PropertyCondition(AutomationElement.NameProperty, "leagueoflegends.com", PropertyConditionFlags.IgnoreCase),
             new PropertyCondition(AutomationElement.NameProperty, "www.leagueoflegends.com", PropertyConditionFlags.IgnoreCase)));
+
+    private static readonly Condition LeagueHubMerchTab = new AndCondition(
+        new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.TabItem),
+        new PropertyCondition(AutomationElement.NameProperty, "Merch", PropertyConditionFlags.IgnoreCase));
+
+    private static readonly Condition LeagueHubMacLink = new AndCondition(
+        new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Hyperlink),
+        new PropertyCondition(AutomationElement.NameProperty, "MacOS", PropertyConditionFlags.IgnoreCase),
+        new PropertyCondition(AutomationElement.ClassNameProperty, "button platform-button"));
+
+    private static readonly Condition GameHubContentButton = new PropertyCondition(
+        AutomationElement.ControlTypeProperty, ControlType.Button);
+
+    private static readonly Regex LeagueHubContentName = new Regex(
+        @"《英雄[聯联]盟》|\bLeague of Legends\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     private static readonly Condition EnabledPlayButton = new AndCondition(
         new PropertyCondition(AutomationElement.ControlTypeProperty, ControlType.Button),
@@ -138,20 +154,46 @@ internal static class RiotPlayButton
 
     internal static bool TryInvokeOnLeaguePage(AutomationElement window)
     {
-        if (window == null || window.Current.IsOffscreen ||
-            window.FindFirst(TreeScope.Descendants, LeaguePageLink) == null) return false;
+        InvokePattern play = FindLeaguePlay(window);
+        if (play == null) return false;
+        play.Invoke();
+        return true;
+    }
+
+    internal static InvokePattern FindLeaguePlay(AutomationElement window)
+    {
+        if (window == null || window.Current.IsOffscreen) return null;
+
+        bool hasWebsiteLink = window.FindFirst(TreeScope.Descendants, LeaguePageLink) != null;
+        if (!hasWebsiteLink && !HasLeagueHubMarkers(window)) return null;
 
         Rect windowBounds = window.Current.BoundingRectangle;
         foreach (AutomationElement button in window.FindAll(TreeScope.Descendants, EnabledPlayButton))
         {
+            if (!hasWebsiteLink && button.Current.ClassName != "cta-button-resting-state-button") continue;
             Rect bounds = button.Current.BoundingRectangle;
             object pattern;
             if (bounds.IsEmpty || bounds.Width <= 0 || bounds.Height <= 0 ||
                 !windowBounds.Contains(bounds.X + bounds.Width / 2, bounds.Y + bounds.Height / 2) ||
                 !button.TryGetCurrentPattern(InvokePattern.Pattern, out pattern)) continue;
 
-            ((InvokePattern)pattern).Invoke();
-            return true;
+            return (InvokePattern)pattern;
+        }
+        return null;
+    }
+
+    private static bool HasLeagueHubMarkers(AutomationElement window)
+    {
+        // The new League page may omit its website link. Require additional
+        // product evidence because other Riot games use the same Play control.
+        if (window.FindFirst(TreeScope.Descendants, LeagueHubMerchTab) == null ||
+            window.FindFirst(TreeScope.Descendants, LeagueHubMacLink) == null) return false;
+
+        foreach (AutomationElement button in window.FindAll(TreeScope.Descendants, GameHubContentButton))
+        {
+            var content = button.Current;
+            if ((" " + content.ClassName + " ").Contains(" content-card-base ") &&
+                LeagueHubContentName.IsMatch(content.Name ?? "")) return true;
         }
         return false;
     }
